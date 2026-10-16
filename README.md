@@ -112,7 +112,7 @@ Todos usam o painel "Cenários". O botão "Restaurar dados iniciais" volta ao es
 | Preço alterado durante a compra | Com o Emerald Ape (`nft-001`) no carrinho, mude o preço dele no painel. O carrinho avisa e atualiza o resumo; na revisão do pedido, a confirmação é recusada e pede nova confirmação com os valores novos |
 | Edição esgotada                 | "Esgotar todas as edições" do NFT que está no carrinho                                                                                                                                                    |
 | Timeout com recuperação         | Cenário `order-timeout` e confirme a compra: após 8 s o app avisa que está verificando, repete com a mesma chave e abre o mesmo pedido                                                                    |
-| Pedido pendente e nova compra   | Com um pedido ainda pendente (cenário `order-timeout`), volte ao `/pagamento` e confirme de novo: o servidor responde `ORDER_PENDING` e o app abre o pedido em andamento, sem comprar duas vezes             |
+| Pedido pendente e nova compra   | Com um pedido ainda pendente (cenário `order-timeout`), volte ao `/pagamento` e confirme de novo: o servidor responde `ORDER_PENDING` e o app abre o pedido em andamento, sem comprar duas vezes          |
 | Revisão com preço mudando       | Abra a revisão do pedido e mude o preço do NFT no painel: a revisão troca sozinha para os valores novos e pede "Confirmar novos valores"                                                                  |
 | Pagamento recusado              | Cenário `payment-declined` e conclua uma compra                                                                                                                                                           |
 | Carteira recusada               | Cenário `wallet-rejected` e clique em "Conectar carteira"                                                                                                                                                 |
@@ -139,7 +139,7 @@ npm run build
 npm run lighthouse           # 3 medições × (Início, Detalhe) × (mobile, desktop)
 ```
 
-Configuração em [`scripts/lighthouse.mjs`](./scripts/lighthouse.mjs). Última auditoria (mediana de 3): desktop 96–98 de Performance e 100 nas demais categorias; mobile 57–60 de Performance e 100 nas demais. Relatórios HTML/JSON da execução mediana, resumo com as medianas, versões e ambiente ficam em [`docs/lighthouse/`](./docs/lighthouse). A análise dos resultados está no [ARCHITECTURE.md](./ARCHITECTURE.md#performance-e-lighthouse).
+Configuração em [`scripts/lighthouse.mjs`](./scripts/lighthouse.mjs). Para auditar o deploy: `LH_URL=https://frontend-challenge-jungle-eight.vercel.app npm run lighthouse`. Última auditoria, no deploy (mediana de 3): desktop 99–100 de Performance e 100 nas demais categorias; mobile 81–84 de Performance e 100 nas demais. Relatórios HTML/JSON da execução mediana, resumo com as medianas, versões e ambiente ficam em [`docs/lighthouse/`](./docs/lighthouse). A análise dos resultados está no [ARCHITECTURE.md](./ARCHITECTURE.md#performance-e-lighthouse).
 
 ## Estrutura
 
