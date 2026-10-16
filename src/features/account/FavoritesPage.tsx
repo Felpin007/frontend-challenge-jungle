@@ -12,16 +12,20 @@ import { useFavorites } from '@/features/favorites/queries'
 /** Lista de interesse: NFTs favoritados pelo usuário autenticado. */
 export function FavoritesPage() {
   const session = useStoredSession()
-  const userId = session!.userId
+  const userId = session?.userId ?? 'anonymous'
   const ids = useFavorites()
   const items = useQuery({
     queryKey: queryKeys.user.favoriteItems(userId),
     queryFn: ({ signal }) => favoritesApi.items({ signal }),
+    enabled: Boolean(session),
   })
 
   // Ao desfavoritar aqui, o card some na hora (o cache de ids é otimista).
   const visible =
     items.data?.items.filter((nft) => !ids.data || ids.data.nftIds.includes(nft.id)) ?? []
+
+  // Sem sessão (expirou ou logout): o AuthWatcher já está levando ao login.
+  if (!session) return null
 
   return (
     <section aria-labelledby="favorites-title" className="flex flex-col gap-6">

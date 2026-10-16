@@ -5,7 +5,7 @@ test.describe('acessibilidade', () => {
   test('link "Pular para o conteúdo" é o primeiro foco e leva ao conteúdo', async ({ page }) => {
     await page.goto('/')
     // O app só renderiza depois que os mocks sobem (após o evento load)
-    await expect(page.getByTestId('nft-card').first()).toBeVisible()
+    await expect(page.getByTestId('nft-card').first()).toBeVisible({ timeout: 15_000 })
     await page.keyboard.press('Tab')
     const skip = page.getByRole('link', { name: 'Pular para o conteúdo' })
     await expect(skip).toBeFocused()

@@ -65,10 +65,12 @@ const draftKey = (userId: string) => `kurio:checkout-draft:${userId}`
 
 export function CheckoutPage() {
   const session = useStoredSession()
-  const userId = session!.userId
   const profile = useProfile()
   const wallets = useWallets()
   const cart = useCart()
+  // Sem sessão (expirou ou logout): o AuthWatcher já está levando ao login.
+  if (!session) return null
+  const userId = session.userId
 
   if (profile.isPending || wallets.isPending || cart.isPending) {
     return (

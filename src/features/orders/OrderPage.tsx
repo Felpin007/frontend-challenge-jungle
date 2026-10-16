@@ -27,12 +27,15 @@ const PENDING_POLL_MS = 5000
 
 export function OrderPage({ orderId }: { orderId: string }) {
   const session = useStoredSession()
-  const userId = session!.userId
+  const userId = session?.userId ?? 'anonymous'
   const query = useQuery({
     queryKey: queryKeys.user.order(userId, orderId),
     queryFn: ({ signal }) => ordersApi.get(orderId, { signal }),
     refetchInterval: (q) => (q.state.data?.status === 'pending' ? PENDING_POLL_MS : false),
+    enabled: Boolean(session),
   })
+  // Sem sessão (expirou ou logout): o AuthWatcher já está levando ao login.
+  if (!session) return null
 
   if (query.isPending) {
     return (

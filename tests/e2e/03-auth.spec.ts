@@ -1,4 +1,4 @@
-import { expect, loginViaApi, loginViaUi, logout, test } from './fixtures'
+import { addToCart, expect, loginViaApi, loginViaUi, logout, test } from './fixtures'
 
 /** Cenário 3: cadastro, login, expiração de sessão, logout e troca de usuário. */
 test.describe('conta e sessão', () => {
@@ -66,6 +66,30 @@ test.describe('conta e sessão', () => {
     ).toBeVisible()
     await loginViaUi(page, 'ana')
     await expect(page).toHaveURL(/\/perfil\/carteiras$/)
+  })
+
+  test('sessão expira durante o checkout: login e retomada com o formulário preservado', async ({
+    page,
+    mocks,
+  }) => {
+    await loginViaApi(page, 'ana')
+    await addToCart(page, 'nft-001')
+    await page.getByTestId('checkout-button').click()
+    await page.waitForURL('**/pagamento')
+    const note = page.getByLabel('Observação do colecionador (opcional)')
+    await note.fill('Entregar na carteira principal, por favor')
+
+    await mocks.expireSessions()
+    await page.getByTestId('connect-wallet').click() // primeira chamada à API após expirar
+    await expect(page).toHaveURL(/\/login\?.*redirect=%2Fpagamento.*reason=expired/)
+    await loginViaUi(page, 'ana')
+    await expect(page).toHaveURL(/\/pagamento$/)
+    await expect(page.getByLabel('Observação do colecionador (opcional)')).toHaveValue(
+      'Entregar na carteira principal, por favor',
+    )
+    await expect(page.getByTestId('cart-item').or(page.getByTestId('quote-total'))).not.toHaveCount(
+      0,
+    )
   })
 
   test('logout limpa dados privados e a troca de usuário não vaza dados', async ({ page }) => {

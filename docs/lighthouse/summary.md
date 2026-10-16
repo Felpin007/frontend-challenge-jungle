@@ -1,11 +1,13 @@
-# Lighthouse — mediana de 2 medições
+# Lighthouse — mediana de 3 medições
 
-Gerado em 2026-10-16T15:24:54.495Z contra http://localhost:4174
+Gerado em 2026-10-16T15:36:11.551Z contra http://localhost:4174
 
 | Página | Perfil | Performance | Accessibility | Best Practices | SEO | LCP | CLS | TBT |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| / | desktop | 92 | 100 | 100 | 92 | 1.31 s | 0 | 172 ms |
-| /nft/nft-001 | desktop | 94 | 100 | 100 | 92 | 1.16 s | 0.202 | 139 ms |
+| / | mobile | 57 | 100 | 100 | 100 | 4.48 s | 0 | 760 ms |
+| / | desktop | 96 | 100 | 100 | 100 | 1.10 s | 0 | 99 ms |
+| /nft/nft-001 | mobile | 60 | 100 | 100 | 100 | 4.37 s | 0 | 636 ms |
+| /nft/nft-001 | desktop | 98 | 100 | 100 | 100 | 1.02 s | 0 | 53 ms |
 
 - Lighthouse 13.5.0
 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36

@@ -34,7 +34,7 @@ export function useToggleFavorite() {
     mutationFn: ({ nftId, favorite }: { nftId: string; favorite: boolean; name: string }) =>
       favorite ? favoritesApi.add(nftId) : favoritesApi.remove(nftId),
     onMutate: async ({ nftId, favorite }) => {
-      const key = queryKeys.user.favorites(session!.userId)
+      const key = queryKeys.user.favorites(session?.userId ?? 'anonymous')
       await queryClient.cancelQueries({ queryKey: key })
       const previous = queryClient.getQueryData<FavoritesResponse>(key)
       queryClient.setQueryData<FavoritesResponse>(key, (old) => {
