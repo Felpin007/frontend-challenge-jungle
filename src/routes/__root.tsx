@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 import type { RouterContext } from '@/app/router'
+import { Deferred } from '@/components/common/Deferred'
 import { ConnectionBanner } from '@/components/feedback/ConnectionBanner'
 import { NotFoundPage } from '@/components/feedback/NotFoundPage'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
@@ -47,11 +48,13 @@ function RootLayout() {
       <RealtimeProvider />
       <SiteHeader />
       <ConnectionBanner />
-      <main id="conteudo" tabIndex={-1} className="pb-28 outline-none lg:pb-0">
+      <main id="conteudo" tabIndex={-1} className="min-h-dvh pb-28 outline-none lg:pb-0">
         <Outlet />
       </main>
       {showFooter ? (
-        <SiteFooter className={hideFooterOnMobile ? 'max-lg:hidden' : undefined} />
+        <Deferred minHeight={640}>
+          <SiteFooter className={hideFooterOnMobile ? 'max-lg:hidden' : undefined} />
+        </Deferred>
       ) : null}
       <MobileTabBar />
       <Toaster position="top-center" closeButton />

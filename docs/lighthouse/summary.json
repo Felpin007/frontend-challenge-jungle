@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-10-16T15:24:54.495Z",
+  "target": "http://localhost:4174",
+  "runsPerPage": 2,
+  "scenario": "default (mocks MSW ligados, latência normal 150–450 ms)",
+  "environment": {
+    "node": "v26.8.1",
+    "os": "Windows_NT 10.0.26200 (x64)",
+    "cpu": "Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz",
+    "memoryGb": 16
+  },
+  "results": [
+    {
+      "page": "/",
+      "profile": "desktop",
+      "median": {
+        "performance": 92,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 92
+      },
+      "medianMetrics": {
+        "lcpMs": 1315,
+        "cls": 0,
+        "tbtMs": 172,
+        "fcpMs": 876
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 90,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 92
+          },
+          "metrics": {
+            "lcpMs": 1315,
+            "cls": 0,
+            "tbtMs": 172,
+            "fcpMs": 876
+          }
+        },
+        {
+          "scores": {
+            "performance": 92,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 92
+          },
+          "metrics": {
+            "lcpMs": 1236,
+            "cls": 0,
+            "tbtMs": 159,
+            "fcpMs": 798
+          }
+        }
+      ],
+      "report": "inicio-desktop.html"
+    },
+    {
+      "page": "/nft/nft-001",
+      "profile": "desktop",
+      "median": {
+        "performance": 94,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 92
+      },
+      "medianMetrics": {
+        "lcpMs": 1164,
+        "cls": 0.202,
+        "tbtMs": 139,
+        "fcpMs": 778
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 94,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 92
+          },
+          "metrics": {
+            "lcpMs": 1164,
+            "cls": 0,
+            "tbtMs": 139,
+            "fcpMs": 778
+          }
+        },
+        {
+          "scores": {
+            "performance": 88,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 92
+          },
+          "metrics": {
+            "lcpMs": 944,
+            "cls": 0.202,
+            "tbtMs": 80,
+            "fcpMs": 711
+          }
+        }
+      ],
+      "report": "detalhe-desktop.html"
+    }
+  ],
+  "lighthouseVersion": "13.5.0",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36"
+}

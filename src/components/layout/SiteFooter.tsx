@@ -58,7 +58,10 @@ export function CompatibleWallets({ className = '' }: { className?: string }) {
 
 export function SiteFooter({ className }: { className?: string }) {
   return (
-    <footer className={`mt-24 pb-24 lg:pb-0 ${className ?? ''}`}>
+    // content-visibility: o navegador só calcula o layout do rodapé quando ele se aproxima da tela
+    <footer
+      className={`mt-24 pb-24 [contain-intrinsic-size:auto_640px] [content-visibility:auto] lg:pb-0 ${className ?? ''}`}
+    >
       <Container>
         <div className="overflow-hidden rounded-t-sm bg-card">
           <div className="grid gap-8 px-6 py-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:px-12">

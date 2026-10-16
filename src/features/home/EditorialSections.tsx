@@ -22,7 +22,10 @@ export function PromoCards() {
     },
   ]
   return (
-    <section aria-label="Coleções em destaque" className="grid gap-7 md:grid-cols-2">
+    <section
+      aria-label="Coleções em destaque"
+      className="grid gap-7 [contain-intrinsic-size:auto_250px] [content-visibility:auto] md:grid-cols-2"
+    >
       {promos.map((promo) => (
         <article key={promo.title} className="flex overflow-hidden rounded-lg bg-card">
           <div className="w-1/2 shrink-0 overflow-hidden rounded-[18px]">
@@ -85,7 +88,10 @@ const POSTS = [
 /** "Diário da Cunhagem": conteúdo editorial está fora do escopo, então "Ler mais" fica desabilitado. */
 export function BlogSection() {
   return (
-    <section aria-labelledby="blog-title" className="flex flex-col gap-10">
+    <section
+      aria-labelledby="blog-title"
+      className="flex flex-col gap-10 [contain-intrinsic-size:auto_480px] [content-visibility:auto]"
+    >
       <header className="flex flex-col gap-3 text-center">
         <h2 id="blog-title" className="text-[28px] leading-9 font-bold">
           Diário da Cunhagem

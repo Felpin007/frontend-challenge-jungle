@@ -1,7 +1,6 @@
 import { useId, useState, type FormEvent } from 'react'
 import type { NftListResponse } from '@/api/contracts'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
@@ -90,9 +89,17 @@ function FacetCheckbox({
   onToggle: () => void
 }) {
   const id = useId()
+  // Checkbox nativo: o Checkbox do Radix mede o próprio tamanho num layout effect,
+  // forçando um recálculo de layout da página para cada filtro (custo alto no mobile).
   return (
     <div className="flex min-h-10 items-center gap-3 px-3">
-      <Checkbox id={id} checked={checked} onCheckedChange={onToggle} />
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={onToggle}
+        className="size-4 shrink-0 cursor-pointer accent-primary"
+      />
       <Label
         htmlFor={id}
         className={cn(
@@ -101,7 +108,7 @@ function FacetCheckbox({
         )}
       >
         <span>{label}</span>
-        <span aria-label={`${count} itens`}>({count})</span>
+        <span>({count})</span>
       </Label>
     </div>
   )

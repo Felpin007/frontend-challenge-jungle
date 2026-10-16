@@ -22,6 +22,10 @@ import { publish } from './bus'
 
 export const DEFAULT_PAGE_SIZE = 9
 
+/** Um único Collator: `localeCompare(x, 'pt-BR')` cria um novo a cada comparação (lento). */
+const collator = new Intl.Collator('pt-BR')
+const byId = (a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+
 export function toSummary(nft: NftDetail): NftSummary {
   const {
     description: _d,
@@ -78,15 +82,15 @@ export function listNfts(query: NftListQuery): NftListResponse {
   const sorted = [...filtered].sort((a, b) => {
     switch (query.sort) {
       case 'price-asc':
-        return compareEth(a.price, b.price) || a.id.localeCompare(b.id)
+        return compareEth(a.price, b.price) || byId(a, b)
       case 'price-desc':
-        return compareEth(b.price, a.price) || a.id.localeCompare(b.id)
+        return compareEth(b.price, a.price) || byId(a, b)
       case 'popular':
-        return b.popularity - a.popularity || a.id.localeCompare(b.id)
+        return b.popularity - a.popularity || byId(a, b)
       case 'name':
-        return a.name.localeCompare(b.name, 'pt-BR')
+        return collator.compare(a.name, b.name)
       default:
-        return Date.parse(b.listedAt) - Date.parse(a.listedAt) || a.id.localeCompare(b.id)
+        return Date.parse(b.listedAt) - Date.parse(a.listedAt) || byId(a, b)
     }
   })
 
@@ -110,7 +114,7 @@ export function listNfts(query: NftListQuery): NftListResponse {
           label: CATEGORY_LABELS[id],
           count: base.filter((n) => n.category === id).length,
         }))
-        .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR')),
+        .sort((a, b) => collator.compare(a.label, b.label)),
       networks: NETWORKS.map((id) => ({
         id,
         label: NETWORK_LABELS[id],

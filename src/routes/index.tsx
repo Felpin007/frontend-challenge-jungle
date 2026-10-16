@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Deferred } from '@/components/common/Deferred'
 import { Container } from '@/components/layout/Container'
 import { CatalogSection, MobileSearchBar } from '@/features/catalog/CatalogSection'
 import { featuredQueryOptions, nftListQueryOptions } from '@/features/catalog/queries'
@@ -27,8 +28,12 @@ function HomePage() {
         <HeroCarousel />
         <CatalogSection />
       </div>
-      <PromoCards />
-      <BlogSection />
+      <Deferred minHeight={250}>
+        <PromoCards />
+      </Deferred>
+      <Deferred minHeight={480}>
+        <BlogSection />
+      </Deferred>
     </Container>
   )
 }

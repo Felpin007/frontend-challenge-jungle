@@ -20,6 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { useIsDesktop } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
 import { CatalogFilters } from './CatalogFilters'
 import { nftListQueryOptions } from './queries'
@@ -32,6 +33,7 @@ export function CatalogSection() {
   const query = toListQuery(search)
   const list = useQuery(nftListQueryOptions(query))
   const facets = list.data?.facets
+  const isDesktop = useIsDesktop()
 
   return (
     <section id="catalogo" aria-labelledby="catalog-title" className="scroll-mt-6">
@@ -39,10 +41,14 @@ export function CatalogSection() {
         Catálogo de NFTs
       </h2>
       <div className="flex gap-12">
-        <aside className="hidden w-[310px] shrink-0 flex-col gap-6 lg:flex" aria-label="Filtros">
-          <CatalogFilters facets={facets} />
-          <SpotlightCard />
-        </aside>
+        {/* Só no desktop: escondida por CSS, a barra ainda seria montada (o Slider mede o
+            próprio tamanho e força layout). No mobile os filtros ficam no drawer. */}
+        {isDesktop ? (
+          <aside className="flex w-[310px] shrink-0 flex-col gap-6" aria-label="Filtros">
+            <CatalogFilters facets={facets} />
+            <SpotlightCard />
+          </aside>
+        ) : null}
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           <CatalogToolbar />
           <ActiveSearchChip />
