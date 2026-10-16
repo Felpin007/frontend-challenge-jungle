@@ -2,7 +2,7 @@
 
 Implementação do desafio de frontend da Jungle Gaming: marketplace de NFTs com descoberta, compra e conta do colecionador, em desktop e mobile. Não há backend real: a API REST e o servidor Socket.IO são simulados no navegador com **MSW**, então o projeto roda inteiro a partir de um checkout limpo.
 
-- **Demo:** _(URL da Vercel)_
+- **Demo:** https://frontend-challenge-jungle-eight.vercel.app
 - **Decisões, contratos e limitações:** [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 | Responsabilidade              | Tecnologia                                                           |
@@ -41,6 +41,8 @@ npm run dev            # http://localhost:5173 (com mocks)
 | `npm run test:e2e:report`    | Abre o último relatório HTML                            |
 | `npm run test:visual:update` | Regera as baselines de regressão visual                 |
 | `npm run lighthouse`         | Auditoria Lighthouse (precisa de `npm run build` antes) |
+
+Para rodar os testes contra o deploy, sem servidor local: `PLAYWRIGHT_BASE_URL=https://frontend-challenge-jungle-eight.vercel.app npm run test:e2e`.
 
 O Playwright sobe sozinho o build de produção (`npm run build && vite preview`). Se já houver algo rodando na porta 4173, ele reaproveita esse servidor; nesse caso, confirme que ele está servindo o build mais recente.
 

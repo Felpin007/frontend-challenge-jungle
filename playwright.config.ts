@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 4173
 const isCI = Boolean(process.env.CI)
+/** PLAYWRIGHT_BASE_URL=https://... roda os testes contra um deploy (sem subir servidor local). */
+const externalBaseUrl = process.env.PLAYWRIGHT_BASE_URL
 
 /**
  * Os testes rodam contra o build de produção (vite preview) com os mocks
@@ -24,7 +26,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   snapshotPathTemplate: '{testDir}/visual/__screenshots__/{projectName}/{arg}{ext}',
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: externalBaseUrl ?? `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'off',
@@ -51,10 +53,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],
-  webServer: {
-    command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
-    url: `http://localhost:${PORT}`,
-    reuseExistingServer: !isCI,
-    timeout: 180_000,
-  },
+  webServer: externalBaseUrl
+    ? undefined
+    : {
+        command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
+        url: `http://localhost:${PORT}`,
+        reuseExistingServer: !isCI,
+        timeout: 180_000,
+      },
 })
