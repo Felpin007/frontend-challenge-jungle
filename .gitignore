@@ -1,0 +1,25 @@
+node_modules
+dist
+*.local
+.env.local
+.env.*.local
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Lighthouse raw runs (the summarized reports are versioned in docs/lighthouse)
+/.lighthouse-tmp/
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.log
+
+# TanStack Router (cache gerado no build)
+.tanstack

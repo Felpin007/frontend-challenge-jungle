@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/roboto-mono/wght.css';
+
+/*
+ * Tokens extraídos do Figma (estilos "Color/*" e "Text/*").
+ * Os nomes seguem o padrão do shadcn/ui para que os componentes
+ * gerados pelo CLI herdem a identidade visual da Kurio sem ajustes.
+ */
+:root {
+  --radius: 0.375rem;
+
+  --background: #140d0a; /* Color/Ink */
+  --foreground: #f5f1eb; /* Color/Foreground */
+  --card: #241612; /* Color/Surface Card */
+  --card-foreground: #f5f1eb;
+  --popover: #241612;
+  --popover-foreground: #f5f1eb;
+  --primary: #d28a4c; /* Color/Primary */
+  --primary-foreground: #140d0a;
+  --secondary: #2f1d15; /* Color/Surface Raised */
+  --secondary-foreground: #f5f1eb;
+  --muted: #2f1d15;
+  --muted-foreground: #cfb28c; /* Text/Secondary */
+  --accent: #38220f; /* Color/Surface Dark */
+  --accent-foreground: #e89b55;
+  /* Color/Error (#ed1b2e) tem contraste 4.39:1 no fundo; usamos um tom mais claro (7.5:1). */
+  --destructive: #ff7a6e;
+  --border: #3f2319; /* Color/Border */
+  --input: #6b4530; /* Color/Border Soft clareado para atingir 3:1 em campos */
+  --ring: #e89b55;
+
+  --brand-accent: #e89b55; /* Text/Accent */
+  --brand-secondary: #b39463; /* Color/Secondary */
+  --brand-coral: #f0805f; /* Text/Coral (asterisco de obrigatório) */
+  --brand-success: #3ccf8e;
+  --brand-amber: #e3a44e;
+  --surface-band: #38220f;
+}
+
+@theme inline {
+  --font-sans: 'Roboto Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: 'Roboto Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-coral: var(--brand-coral);
+  --color-success: var(--brand-success);
+  --color-amber: var(--brand-amber);
+  --color-surface-band: var(--surface-band);
+
+  --breakpoint-xs: 26rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/* Skeleton com shimmer; desligado quando o usuário prefere menos movimento. */
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--secondary);
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(245 241 235 / 0.06), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
