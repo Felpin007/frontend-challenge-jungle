@@ -80,10 +80,10 @@ export function HeroCarousel() {
           />
           <div className="flex min-w-0 flex-1 flex-col sm:max-w-[320px]">
             <p className="text-xs leading-4 font-medium">Bem-vindo à Kurio</p>
-            <h1 className="mt-1.5 text-lg leading-[29px] font-bold">
-              SEJA DONO DA
-              <br />
-              CULTURA DIGITAL
+            {/* Quebra balanceada em vez de <br>: igual ao Figma no tamanho padrão e sem
+                virar 4 linhas quando o sistema usa fonte maior */}
+            <h1 className="mt-1.5 text-lg leading-[1.6] font-bold text-balance">
+              SEJA DONO DA CULTURA DIGITAL
             </h1>
             <p className="mt-1.5 max-w-[188px] text-xs leading-[18px] text-muted-foreground sm:max-w-none">
               Descubra NFTs selecionados de criadores do mundo todo.
@@ -111,13 +111,21 @@ export function HeroCarousel() {
               </div>
             ) : null}
           </div>
-          <Dots
-            count={slides.length || 3}
-            index={index}
-            onSelect={setIndex}
-            variant="compact"
-            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2"
-          />
+          {/* Pontos do Figma (7 px, a cada 13 px) num único botão: área de toque de 49 × 24 px */}
+          <button
+            type="button"
+            onClick={() => setIndex((index + 1) % (slides.length || 1))}
+            aria-label={`Próximo destaque (${index + 1} de ${slides.length || 3})`}
+            className="absolute -bottom-0.5 left-1/2 flex h-6 -translate-x-1/2 items-center gap-1.5 rounded-full px-2"
+          >
+            {Array.from({ length: slides.length || 3 }, (_, i) => (
+              <span
+                key={i}
+                className={cn('size-[7px] rounded-full bg-primary', i !== index && 'opacity-55')}
+                aria-hidden="true"
+              />
+            ))}
+          </button>
         </div>
       )}
       <p className="sr-only" aria-live="polite">
@@ -132,17 +140,14 @@ function Dots({
   index,
   onSelect,
   className,
-  variant = 'default',
 }: {
   count: number
   index: number
   onSelect: (i: number) => void
   className?: string
-  /** compact: pontos de 7 px a cada 13 px, como no destaque mobile do Figma. */
-  variant?: 'default' | 'compact'
 }) {
   return (
-    <div className={cn('flex', variant === 'default' && 'gap-1', className)}>
+    <div className={cn('flex gap-1', className)}>
       {Array.from({ length: count }, (_, i) => (
         <button
           key={i}
@@ -150,17 +155,12 @@ function Dots({
           onClick={() => onSelect(i)}
           aria-label={`Mostrar destaque ${i + 1}`}
           aria-current={i === index ? 'true' : undefined}
-          className={cn(
-            'grid place-items-center rounded-full',
-            variant === 'compact' ? 'h-6 w-[13px]' : 'size-6',
-          )}
+          className="grid size-6 place-items-center rounded-full"
         >
           <span
             className={cn(
-              'block rounded-full bg-primary transition',
-              variant === 'compact'
-                ? cn('size-[7px]', i !== index && 'opacity-55')
-                : cn('size-2', i === index ? 'scale-125' : 'opacity-50'),
+              'block size-2 rounded-full bg-primary transition',
+              i === index ? 'scale-125' : 'opacity-50',
             )}
           />
         </button>

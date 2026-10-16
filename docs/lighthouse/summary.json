@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-16T15:36:11.551Z",
-  "target": "http://localhost:4174",
+  "generatedAt": "2026-10-16T20:17:46.395Z",
+  "target": "https://frontend-challenge-jungle-eight.vercel.app",
   "runsPerPage": 3,
   "scenario": "default (mocks MSW ligados, latência normal 150–450 ms)",
   "environment": {
@@ -14,58 +14,58 @@
       "page": "/",
       "profile": "mobile",
       "median": {
-        "performance": 57,
-        "accessibility": 100,
+        "performance": 71,
+        "accessibility": 97,
         "best-practices": 100,
         "seo": 100
       },
       "medianMetrics": {
-        "lcpMs": 4483,
+        "lcpMs": 3275,
         "cls": 0,
-        "tbtMs": 760,
-        "fcpMs": 3875
+        "tbtMs": 612,
+        "fcpMs": 2747
       },
       "runs": [
         {
           "scores": {
-            "performance": 61,
-            "accessibility": 100,
+            "performance": 70,
+            "accessibility": 97,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 4328,
+            "lcpMs": 3265,
             "cls": 0,
-            "tbtMs": 577,
-            "fcpMs": 3875
+            "tbtMs": 638,
+            "fcpMs": 2732
           }
         },
         {
           "scores": {
-            "performance": 51,
-            "accessibility": 100,
+            "performance": 75,
+            "accessibility": 97,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 4900,
+            "lcpMs": 3298,
             "cls": 0,
-            "tbtMs": 1044,
-            "fcpMs": 3812
+            "tbtMs": 451,
+            "fcpMs": 2747
           }
         },
         {
           "scores": {
-            "performance": 57,
-            "accessibility": 100,
+            "performance": 71,
+            "accessibility": 97,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 4483,
+            "lcpMs": 3275,
             "cls": 0,
-            "tbtMs": 760,
-            "fcpMs": 3939
+            "tbtMs": 612,
+            "fcpMs": 2977
           }
         }
       ],
@@ -75,58 +75,58 @@
       "page": "/",
       "profile": "desktop",
       "median": {
-        "performance": 96,
+        "performance": 99,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
       "medianMetrics": {
-        "lcpMs": 1101,
+        "lcpMs": 744,
         "cls": 0,
-        "tbtMs": 99,
-        "fcpMs": 773
+        "tbtMs": 50,
+        "fcpMs": 598
       },
       "runs": [
         {
           "scores": {
-            "performance": 96,
+            "performance": 99,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 1101,
+            "lcpMs": 744,
             "cls": 0,
-            "tbtMs": 99,
-            "fcpMs": 773
+            "tbtMs": 56,
+            "fcpMs": 598
           }
         },
         {
           "scores": {
-            "performance": 96,
+            "performance": 99,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 1109,
+            "lcpMs": 756,
             "cls": 0,
-            "tbtMs": 105,
-            "fcpMs": 774
+            "tbtMs": 50,
+            "fcpMs": 606
           }
         },
         {
           "scores": {
-            "performance": 97,
+            "performance": 99,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 1066,
+            "lcpMs": 707,
             "cls": 0,
-            "tbtMs": 65,
-            "fcpMs": 766
+            "tbtMs": 37,
+            "fcpMs": 578
           }
         }
       ],
@@ -136,58 +136,58 @@
       "page": "/nft/nft-001",
       "profile": "mobile",
       "median": {
-        "performance": 60,
+        "performance": 70,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
       "medianMetrics": {
-        "lcpMs": 4367,
+        "lcpMs": 3308,
         "cls": 0,
-        "tbtMs": 636,
-        "fcpMs": 3765
+        "tbtMs": 653,
+        "fcpMs": 2833
       },
       "runs": [
         {
           "scores": {
-            "performance": 60,
+            "performance": 70,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 4459,
+            "lcpMs": 3308,
             "cls": 0,
-            "tbtMs": 636,
-            "fcpMs": 3770
+            "tbtMs": 653,
+            "fcpMs": 2747
           }
         },
         {
           "scores": {
-            "performance": 63,
+            "performance": 82,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 4367,
+            "lcpMs": 3159,
             "cls": 0,
-            "tbtMs": 538,
-            "fcpMs": 3761
+            "tbtMs": 271,
+            "fcpMs": 2833
           }
         },
         {
           "scores": {
-            "performance": 59,
+            "performance": 52,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 4331,
+            "lcpMs": 3778,
             "cls": 0,
-            "tbtMs": 704,
-            "fcpMs": 3765
+            "tbtMs": 2108,
+            "fcpMs": 2973
           }
         }
       ],
@@ -197,58 +197,58 @@
       "page": "/nft/nft-001",
       "profile": "desktop",
       "median": {
-        "performance": 98,
+        "performance": 95,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
       "medianMetrics": {
-        "lcpMs": 1016,
+        "lcpMs": 823,
         "cls": 0,
-        "tbtMs": 53,
-        "fcpMs": 763
+        "tbtMs": 130,
+        "fcpMs": 571
       },
       "runs": [
         {
           "scores": {
-            "performance": 98,
+            "performance": 94,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 960,
+            "lcpMs": 823,
             "cls": 0,
-            "tbtMs": 66,
-            "fcpMs": 719
+            "tbtMs": 152,
+            "fcpMs": 561
           }
         },
         {
           "scores": {
-            "performance": 98,
+            "performance": 95,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 1023,
+            "lcpMs": 891,
             "cls": 0,
-            "tbtMs": 53,
-            "fcpMs": 767
+            "tbtMs": 130,
+            "fcpMs": 606
           }
         },
         {
           "scores": {
-            "performance": 98,
+            "performance": 99,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
           "metrics": {
-            "lcpMs": 1016,
+            "lcpMs": 762,
             "cls": 0,
-            "tbtMs": 42,
-            "fcpMs": 763
+            "tbtMs": 30,
+            "fcpMs": 571
           }
         }
       ],

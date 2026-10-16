@@ -98,7 +98,8 @@ function CatalogToolbar() {
       <div
         role="tablist"
         aria-label="Seções do catálogo"
-        className="flex gap-4 overflow-x-auto lg:gap-5"
+        // Sem rolagem lateral: com fonte grande ou tela estreita, as abas quebram linha
+        className="flex flex-wrap gap-x-3 gap-y-2 lg:flex-nowrap lg:gap-5"
       >
         {CATALOG_TABS.map((tab, index) => {
           const selected = activeTab === tab
