@@ -15,7 +15,27 @@ export interface StoredSession {
 export type SessionEndReason = 'logout' | 'expired'
 
 const KEY = 'kurio:session'
+/** Motivo do fim da última sessão: sobrevive a um reload (ex.: "sua sessão expirou" no login). */
+const END_REASON_KEY = 'kurio:session-end'
 const listeners = new Set<() => void>()
+
+function readEndReason(): SessionEndReason | null {
+  try {
+    const value = sessionStorage.getItem(END_REASON_KEY)
+    return value === 'expired' || value === 'logout' ? value : null
+  } catch {
+    return null
+  }
+}
+
+function writeEndReason(reason: SessionEndReason | null) {
+  try {
+    if (reason) sessionStorage.setItem(END_REASON_KEY, reason)
+    else sessionStorage.removeItem(END_REASON_KEY)
+  } catch {
+    // sem storage: o motivo vale só até o reload
+  }
+}
 
 function read(): StoredSession | null {
   try {
@@ -27,7 +47,7 @@ function read(): StoredSession | null {
 }
 
 let current = read()
-let lastEndReason: SessionEndReason | null = null
+let lastEndReason: SessionEndReason | null = current ? null : readEndReason()
 
 function emit() {
   listeners.forEach((l) => l())
@@ -39,6 +59,7 @@ export const sessionStore = {
   set(session: StoredSession) {
     current = session
     lastEndReason = null
+    writeEndReason(null)
     try {
       localStorage.setItem(KEY, JSON.stringify(session))
     } catch {
@@ -50,6 +71,7 @@ export const sessionStore = {
     if (!current) return
     current = null
     lastEndReason = reason
+    writeEndReason(reason)
     try {
       localStorage.removeItem(KEY)
     } catch {

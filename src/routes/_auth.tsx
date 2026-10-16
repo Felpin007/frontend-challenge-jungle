@@ -12,7 +12,13 @@ export const Route = createFileRoute('/_auth')({
   beforeLoad: async ({ context, location }) => {
     const session = sessionStore.get()
     const target = { to: '/login' as const, search: { redirect: location.href }, replace: true }
-    if (!session) throw redirect(target)
+    if (!session) {
+      // A sessão pode ter expirado numa requisição em segundo plano antes desta navegação.
+      const expired = sessionStore.lastEndReason() === 'expired'
+      throw redirect(
+        expired ? { ...target, search: { ...target.search, reason: 'expired' as const } } : target,
+      )
+    }
     try {
       const info = await context.queryClient.ensureQueryData(sessionQueryOptions(session.token))
       return { user: info.user }
