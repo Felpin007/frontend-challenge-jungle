@@ -33,7 +33,9 @@ export async function startMocks() {
   await worker.start({
     onUnhandledRequest: 'bypass',
     quiet: import.meta.env.PROD,
-    serviceWorker: { url: `${import.meta.env.BASE_URL}mockServiceWorker.js` },
+    // Envolve o worker do MSW para sobreviver ao encerramento do service worker
+    // pelo navegador (aba ociosa). Ver public/kurio-mock-sw.js.
+    serviceWorker: { url: `${import.meta.env.BASE_URL}kurio-mock-sw.js` },
   })
   window.__kurioMocks = mockControl
 }

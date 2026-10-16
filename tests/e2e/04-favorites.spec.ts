@@ -23,7 +23,8 @@ test.describe('favoritos', () => {
   }) => {
     await loginViaApi(page, 'carla')
     await page.goto('/nft/nft-003')
-    await mocks.delayNext('PUT', '/api/favorites/*', 600)
+    // Janela de 1,5 s para observar o estado otimista antes da falha
+    await mocks.delayNext('PUT', '/api/favorites/*', 1500)
     await mocks.failNext('PUT', '/api/favorites/*', 500)
     await favoriteToggle(page).click()
     // Otimista: marca na hora…

@@ -48,7 +48,7 @@ const SOCIAL = [
 export function CompatibleWallets({ className = '' }: { className?: string }) {
   return (
     <p
-      className={`inline-flex items-center gap-2 rounded-sm border border-primary/40 bg-surface-band px-2.5 py-1 text-[9px] font-bold tracking-wide text-brand-accent ${className}`}
+      className={`inline-flex h-[26px] items-center gap-2 rounded-md border border-[#55321f] bg-surface-band px-2 text-[9px] font-bold tracking-[0.01em] text-brand-accent ${className}`}
     >
       METAMASK <span aria-hidden="true">•</span> WALLETCONNECT <span aria-hidden="true">•</span>{' '}
       COINBASE
@@ -64,11 +64,11 @@ export function SiteFooter({ className }: { className?: string }) {
     >
       <Container>
         <div className="overflow-hidden rounded-t-sm bg-card">
-          <div className="grid gap-8 px-6 py-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:px-12">
+          <div className="grid gap-8 p-6 md:grid-cols-2 lg:grid-cols-[265px_265px_265px_minmax(0,1fr)] lg:gap-0 lg:p-8">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="flex flex-col gap-2 lg:border-r lg:border-primary lg:pr-6 lg:pl-0 [&:not(:first-child)]:lg:pl-4"
+                className="flex flex-col gap-3 lg:border-r lg:border-primary lg:px-4"
               >
                 <span
                   className="grid size-[74px] place-items-center rounded-full bg-primary text-2xl font-bold text-primary-foreground"
@@ -76,14 +76,18 @@ export function SiteFooter({ className }: { className?: string }) {
                 >
                   {f.letter}
                 </span>
-                <h2 className="text-lg font-bold">{f.title}</h2>
-                <p className="text-[15px] leading-[22px] text-muted-foreground">{f.text}</p>
+                <h2 className="mt-2 text-[17px] leading-4 font-bold">{f.title}</h2>
+                <p className="max-w-[204px] text-sm leading-[22px] text-muted-foreground">
+                  {f.text}
+                </p>
               </div>
             ))}
-            <div className="flex flex-col gap-3 lg:pl-4">
-              <h2 className="text-lg leading-4 font-bold">Antecipe-se ao próximo lançamento</h2>
+            <div className="flex flex-col gap-4 lg:px-4">
+              <h2 className="max-w-[325px] text-lg leading-4 font-bold">
+                Antecipe-se ao próximo lançamento
+              </h2>
               <form
-                className="flex"
+                className="flex h-10 max-w-[325px] rounded-md shadow-[0_0_20px_rgb(10_6_4/0.45)]"
                 onSubmit={(e) => e.preventDefault()}
                 aria-describedby="newsletter-note"
               >
@@ -94,21 +98,27 @@ export function SiteFooter({ className }: { className?: string }) {
                   id="newsletter-email"
                   type="email"
                   placeholder="digite seu e-mail..."
-                  className="rounded-r-none border-0 bg-surface-band"
+                  className="h-10 min-w-0 flex-1 rounded-r-none border-0 bg-surface-band px-3 text-sm placeholder:text-brand-secondary"
                 />
-                <ComingSoon className="rounded-r-md bg-primary px-4 text-lg font-bold text-primary-foreground">
+                <ComingSoon className="w-[85px] shrink-0 rounded-r-md bg-primary text-lg leading-4 font-bold text-primary-foreground">
                   Enviar
                 </ComingSoon>
               </form>
-              <p id="newsletter-note" className="text-sm leading-[22px] text-muted-foreground">
+              <p
+                id="newsletter-note"
+                className="-mt-1 max-w-[325px] text-[13px] leading-[22px] text-muted-foreground"
+              >
                 Receba lançamentos selecionados, histórias de criadores e novidades do mercado.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-3 bg-surface-band px-6 py-6 text-[15px] sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
-            <p className="text-sm font-bold tracking-wide">KURIO</p>
-            <p>Feito para colecionadores, criadores e cultura</p>
+          <div className="grid gap-3 bg-surface-band px-6 py-6 text-sm leading-[22px] sm:grid-cols-2 lg:grid-cols-[179px_179px_179px_228px] lg:items-center lg:justify-between lg:px-8 lg:py-[21px]">
+            <p className="font-bold tracking-[0.1em]">KURIO</p>
+            <p className="lg:w-[219px]">
+              Feito para colecionadores,
+              <br className="max-lg:hidden" /> criadores e cultura
+            </p>
             <a href="mailto:contato@email.com" className="hover:text-brand-accent">
               contato@email.com
             </a>
@@ -117,7 +127,7 @@ export function SiteFooter({ className }: { className?: string }) {
             </a>
           </div>
 
-          <div className="grid gap-8 px-6 py-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
+          <div className="grid gap-8 px-6 py-8 sm:grid-cols-2 lg:grid-cols-[179px_179px_179px_228px] lg:justify-between lg:px-8">
             <FooterColumn title="Meu perfil">
               <Link to="/perfil">Meu perfil</Link>
               <ComingSoon>Minha coleção</ComingSoon>
@@ -139,14 +149,14 @@ export function SiteFooter({ className }: { className?: string }) {
                 </Link>
               ))}
             </FooterColumn>
-            <div className="flex flex-col gap-3">
-              <h2 className="text-lg font-bold">Redes sociais</h2>
-              <ul className="flex gap-2">
+            <div className="flex flex-col gap-5">
+              <h2 className="text-lg leading-4 font-bold">Redes sociais</h2>
+              <ul className="flex gap-2.5">
                 {SOCIAL.map(({ label, Icon }) => (
                   <li key={label}>
                     <ComingSoon
                       label={`${label} da Kurio em breve`}
-                      className="grid size-8 place-items-center rounded-sm border border-primary text-primary"
+                      className="grid size-[30px] place-items-center rounded-[4px] border border-primary text-primary"
                     >
                       <Icon className="max-h-4 max-w-4" />
                       <span className="sr-only">{label}</span>
@@ -154,12 +164,12 @@ export function SiteFooter({ className }: { className?: string }) {
                   </li>
                 ))}
               </ul>
-              <h2 className="mt-4 text-lg font-bold">Carteiras compatíveis</h2>
-              <CompatibleWallets />
+              <h2 className="mt-3 text-lg leading-4 font-bold">Carteiras compatíveis</h2>
+              <CompatibleWallets className="-mt-2 self-start" />
             </div>
           </div>
         </div>
-        <p className="py-2 text-center text-[15px]">
+        <p className="text-center text-sm leading-[30px] lg:mt-1.5">
           © 2026 Kurio. Propriedade digital para todos.
         </p>
       </Container>
@@ -169,9 +179,9 @@ export function SiteFooter({ className }: { className?: string }) {
 
 function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="text-lg font-bold">{title}</h2>
-      <ul className="flex flex-col gap-3 text-[15px]">
+    <div className="flex flex-col gap-2">
+      <h2 className="text-lg leading-4 font-bold">{title}</h2>
+      <ul className="flex flex-col text-sm leading-[30px]">
         {(Array.isArray(children) ? children : [children]).map((child, i) => (
           <li key={i} className="[&_a:hover]:text-brand-accent">
             {child}

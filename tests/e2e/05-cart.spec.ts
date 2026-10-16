@@ -50,4 +50,22 @@ test.describe('carrinho', () => {
     await expect(page.getByTestId('cart-item')).toHaveCount(2)
     await expect(page.getByText('Sage Nomad #009')).toBeVisible()
   })
+
+  test('edição única (1/1) do visitante: limite explicado e resumo calculado', async ({ page }) => {
+    await page.goto('/nft/nft-046') // Silver Signal #782: só a edição 1/1
+    const radio = page.getByRole('radio', { name: /^1\/1/ })
+    await expect(radio).toHaveAttribute('aria-checked', 'true')
+    if ((page.viewportSize()?.width ?? 1440) < 1024) {
+      await page.getByRole('button', { name: 'Comprar NFT', exact: true }).click()
+    } else {
+      await page.getByTestId('buy-button').click()
+    }
+    await page.waitForURL('**/carrinho')
+    await expect(page.getByTestId('cart-item')).toHaveCount(1)
+    await expect(
+      page.getByRole('button', { name: /Aumentar quantidade de Silver Signal/ }),
+    ).toBeDisabled()
+    await expect(page.getByText('Edição única')).toBeVisible()
+    await expect(page.getByTestId('quote-total')).toHaveText('4.786 ETH')
+  })
 })

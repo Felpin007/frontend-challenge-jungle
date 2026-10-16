@@ -24,7 +24,9 @@ export default defineConfig({
     toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled', caret: 'hide' },
   },
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
-  snapshotPathTemplate: '{testDir}/visual/__screenshots__/{projectName}/{arg}{ext}',
+  // Baselines por sistema operacional: a renderização de fontes muda entre Windows, macOS e
+  // Linux. Sem baseline para a plataforma, os testes visuais são pulados (ver visual.spec.ts).
+  snapshotPathTemplate: '{testDir}/visual/__screenshots__/{projectName}/{platform}/{arg}{ext}',
   use: {
     baseURL: externalBaseUrl ?? `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
@@ -51,6 +53,11 @@ export default defineConfig({
       name: 'visual',
       testMatch: /visual\/.*\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'visual-mobile',
+      testMatch: /visual\/.*\.spec\.ts/,
+      use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } },
     },
   ],
   webServer: externalBaseUrl

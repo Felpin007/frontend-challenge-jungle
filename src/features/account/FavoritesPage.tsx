@@ -57,7 +57,7 @@ export function FavoritesPage() {
         <ul className="grid grid-cols-2 gap-6 sm:grid-cols-3" aria-label="Favoritos">
           {visible.map((nft) => (
             <li key={nft.id}>
-              <NftCard nft={nft} />
+              <NftCard nft={nft} headingLevel={2} />
             </li>
           ))}
         </ul>

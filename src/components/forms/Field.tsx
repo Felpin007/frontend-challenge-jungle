@@ -21,6 +21,7 @@ export function Field({
   required,
   error,
   hint,
+  hintClassName,
   className,
   labelClassName,
   srOnlyLabel,
@@ -30,6 +31,8 @@ export function Field({
   required?: boolean
   error?: string
   hint?: string
+  /** Ex.: mostrar a dica só com o campo em foco. Ela continua ligada ao input (aria-describedby). */
+  hintClassName?: string
   className?: string
   labelClassName?: string
   srOnlyLabel?: boolean
@@ -41,10 +44,14 @@ export function Field({
   const describedBy =
     [error ? errorId : null, hint ? hintId : null].filter(Boolean).join(' ') || undefined
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn('flex flex-col gap-[7px]', className)}>
       <Label
         htmlFor={id}
-        className={cn('gap-0 text-[15px] font-normal', srOnlyLabel && 'sr-only', labelClassName)}
+        className={cn(
+          'gap-0 text-[15px] leading-[15px] font-normal',
+          srOnlyLabel && 'sr-only',
+          labelClassName,
+        )}
       >
         {label}
         {required ? (
@@ -60,7 +67,7 @@ export function Field({
         'aria-required': required || undefined,
       })}
       {hint ? (
-        <p id={hintId} className="text-xs text-muted-foreground">
+        <p id={hintId} className={cn('text-xs text-muted-foreground', hintClassName)}>
           {hint}
         </p>
       ) : null}

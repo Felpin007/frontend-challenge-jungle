@@ -5,17 +5,27 @@ import { goToReview } from './helpers'
 test.describe('resiliência do tempo real', () => {
   test('eventos duplicados e antigos são ignorados', async ({ page, mocks }) => {
     await addToCart(page, 'nft-001')
-    await mocks.changePrice('nft-001', '2.5')
+    await page.waitForLoadState('networkidle')
+    await expect.poll(() => mocks.connectionCount()).toBeGreaterThan(0)
     const notice = page.getByText('Preço de Emerald Ape #042 mudou: 1.19 ETH → 2.50 ETH.')
-    await expect(notice).toHaveCount(1)
-    await expect(page.getByTestId('cart-item-price')).toHaveText('2.50 ETH')
 
-    // Mesmo evento reenviado: não é reaplicado (nenhum aviso novo)
-    expect(await mocks.replayLastEvent()).toBe(true)
+    // Evento e duplicata (mesmo eventId e versão) em sequência, com o recarregamento do
+    // carrinho atrasado: o cache ainda tem o preço antigo quando a duplicata chega, então
+    // reaplicá-la geraria um segundo aviso. O teste falha se a proteção for removida.
+    await page.evaluate(() => {
+      const mocks = window.__kurioMocks!
+      mocks.delayNext({ method: 'GET', path: '/api/cart', ms: 3000 })
+      mocks.changePrice('nft-001', '2.5')
+      mocks.replayLastEvent()
+    })
+    await expect(notice).toHaveCount(1)
+    await page.waitForTimeout(500)
+    await expect(notice).toHaveCount(1)
+    await expect(page.getByTestId('cart-item-price')).toHaveText('2.50 ETH', { timeout: 8000 })
+
     // Evento com versão antiga e preço 99.99: não pode regredir o estado
     await mocks.sendStaleNftEvent('nft-001')
     await page.waitForTimeout(800)
-    await expect(notice).toHaveCount(1)
     await expect(page.getByText(/99\.99/)).toHaveCount(0)
     await expect(page.getByTestId('cart-item-price')).toHaveText('2.50 ETH')
   })

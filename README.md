@@ -112,6 +112,8 @@ Todos usam o painel "Cenários". O botão "Restaurar dados iniciais" volta ao es
 | Preço alterado durante a compra | Com o Emerald Ape (`nft-001`) no carrinho, mude o preço dele no painel. O carrinho avisa e atualiza o resumo; na revisão do pedido, a confirmação é recusada e pede nova confirmação com os valores novos |
 | Edição esgotada                 | "Esgotar todas as edições" do NFT que está no carrinho                                                                                                                                                    |
 | Timeout com recuperação         | Cenário `order-timeout` e confirme a compra: após 8 s o app avisa que está verificando, repete com a mesma chave e abre o mesmo pedido                                                                    |
+| Pedido pendente e nova compra   | Com um pedido ainda pendente (cenário `order-timeout`), volte ao `/pagamento` e confirme de novo: o servidor responde `ORDER_PENDING` e o app abre o pedido em andamento, sem comprar duas vezes             |
+| Revisão com preço mudando       | Abra a revisão do pedido e mude o preço do NFT no painel: a revisão troca sozinha para os valores novos e pede "Confirmar novos valores"                                                                  |
 | Pagamento recusado              | Cenário `payment-declined` e conclua uma compra                                                                                                                                                           |
 | Carteira recusada               | Cenário `wallet-rejected` e clique em "Conectar carteira"                                                                                                                                                 |
 | Queda do Socket.IO              | Com um pedido pendente, "Derrubar Socket.IO (5 s)" e depois "Resolver pedidos pendentes agora"; ao reconectar, o status é reconciliado pela API                                                           |
@@ -124,7 +126,8 @@ npx playwright install chromium   # uma vez
 npm run test:e2e
 ```
 
-- **Projetos:** `desktop-chromium` (1440 × 900), `mobile-chromium` (390 × 844) e `visual` (regressão visual de Início, Detalhe, Carrinho e Pagamento).
+- **Projetos:** `desktop-chromium` (1440 × 900), `mobile-chromium` (390 × 844), `visual` e `visual-mobile` (regressão visual de Início, Detalhe, Carrinho e Pagamento em 1440 e 390 px).
+- **Baselines visuais por sistema operacional:** as versionadas são do Windows (`tests/visual/__screenshots__/<projeto>/win32/`). Em macOS ou Linux, os testes visuais são pulados com aviso; para ativá-los, gere as baselines da plataforma uma vez com `npm run test:visual:update`.
 - **Isolamento:** cada teste roda num contexto novo do navegador; o servidor simulado parte do seed.
 - **Saídas:** relatório HTML em `playwright-report/`; traces e screenshots das falhas em `test-results/`.
 - Os 12 cenários pedidos estão em `tests/e2e/01-*.spec.ts` a `12-*.spec.ts`, numerados como no enunciado. O mapa completo está no [ARCHITECTURE.md](./ARCHITECTURE.md#testes).

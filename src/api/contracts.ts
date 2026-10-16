@@ -61,6 +61,8 @@ export const ERROR_CODES = [
   'COUPON_INVALID',
   'COUPON_EXPIRED',
   'IDEMPOTENCY_CONFLICT',
+  /** Já existe um pedido pendente do usuário: `details.orderId` aponta para ele. */
+  'ORDER_PENDING',
   'WALLET_REJECTED',
   'SERVICE_UNAVAILABLE',
   'INTERNAL_ERROR',

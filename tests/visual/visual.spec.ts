@@ -1,5 +1,20 @@
+import { existsSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { addToCart, expect, loginViaApi, test } from '../e2e/fixtures'
+
+/**
+ * As baselines são por sistema operacional (fontes renderizam diferente em cada um).
+ * Sem baseline para a plataforma atual, o teste é pulado com a instrução para gerá-la,
+ * em vez de falhar por diferença de antialiasing.
+ */
+function requireBaseline(name: string) {
+  const info = test.info()
+  const updating = ['all', 'changed'].includes(info.config.updateSnapshots)
+  test.skip(
+    !updating && !existsSync(info.snapshotPath(name)),
+    `Sem baseline de ${name} para ${process.platform}: gere com "npm run test:visual:update".`,
+  )
+}
 
 /**
  * Regressão visual de Início, Detalhe, Carrinho e Pagamento (desktop 1440).
@@ -20,17 +35,22 @@ async function settle(page: Page, { footer = true } = {}) {
     }
     window.scrollTo(0, 0)
   })
+  // Imagens fora da tela na horizontal (carrossel) não carregam com loading="lazy"
+  await page.evaluate(() => {
+    for (const img of Array.from(document.images)) img.loading = 'eager'
+  })
   await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete))
-  // - painel de cenários: ferramenta de demonstração, fora da comparação;
+  // - painel de cenários e avisos (toasts): fora da comparação;
   // - content-visibility: o Chromium não pinta seções fora da tela, e a captura
   //   de página inteira sairia com blog e rodapé em branco.
   await page.addStyleTag({
     content:
-      '[data-testid="mock-panel-trigger"]{visibility:hidden} *{content-visibility:visible!important}',
+      '[data-testid="mock-panel-trigger"],[data-sonner-toaster]{visibility:hidden} *{content-visibility:visible!important}',
   })
 }
 
 test('início', async ({ page }) => {
+  requireBaseline('inicio.png')
   await page.goto('/')
   await expect(page.getByTestId('nft-card')).toHaveCount(9)
   await expect(page.getByRole('heading', { name: 'Diário da Cunhagem' })).toBeAttached()
@@ -39,14 +59,16 @@ test('início', async ({ page }) => {
 })
 
 test('detalhe do NFT', async ({ page }) => {
+  requireBaseline('detalhe.png')
   await page.goto('/nft/nft-001')
   await expect(page.getByRole('heading', { name: 'Emerald Ape #042', level: 1 })).toBeVisible()
-  await expect(page.getByTestId('nft-card')).toHaveCount(5)
+  await expect(page.getByTestId('nft-card')).toHaveCount(15) // carrossel "Mais desta coleção"
   await settle(page)
   await expect(page).toHaveScreenshot('detalhe.png', { fullPage: true })
 })
 
 test('carrinho', async ({ page }) => {
+  requireBaseline('carrinho.png')
   await addToCart(page, 'nft-001', 2)
   await addToCart(page, 'nft-005')
   await expect(page.getByTestId('quote-total')).toHaveText('3.786 ETH')
@@ -55,6 +77,7 @@ test('carrinho', async ({ page }) => {
 })
 
 test('pagamento', async ({ page }) => {
+  requireBaseline('pagamento.png')
   await loginViaApi(page, 'ana')
   await addToCart(page, 'nft-001', 2)
   await addToCart(page, 'nft-005')

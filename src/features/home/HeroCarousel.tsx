@@ -67,49 +67,57 @@ export function HeroCarousel() {
           </div>
         </div>
       ) : (
-        /* Mobile / tablet (Figma "Mobile / Início") */
-        <div className="relative flex min-h-[190px] overflow-hidden rounded-[28px] bg-gradient-to-br from-[#5a3a24] via-[#3a2417] to-card p-4">
-          <div className="relative z-10 flex flex-1 flex-col gap-2 pr-2">
-            <p className="text-xs font-bold">Bem-vindo à Kurio</p>
-            <h1 className="text-lg leading-7 font-bold">
+        /* Mobile / tablet (Figma "Mobile / Início", "Hero Banner" de 366 × 190) */
+        <div className="relative isolate flex min-h-[190px] gap-2 overflow-hidden rounded-[30px] bg-[linear-gradient(to_bottom_right,rgb(210_138_76/0.2),rgb(210_138_76/0.1))] px-4 pt-[5px] pb-[29px]">
+          {/* Elipses decorativas do Figma (Ellipse 49 e 50) */}
+          <span
+            className="absolute top-[-31px] left-[-80px] -z-10 size-[248px] rounded-full bg-[linear-gradient(160deg,rgb(221_154_95/0.43),rgb(210_138_76/0.04))]"
+            aria-hidden="true"
+          />
+          <span
+            className="absolute top-[-10px] left-[73px] -z-10 size-[248px] rounded-full bg-[linear-gradient(160deg,rgb(221_154_95/0.37),rgb(210_138_76/0))]"
+            aria-hidden="true"
+          />
+          <div className="flex min-w-0 flex-1 flex-col sm:max-w-[320px]">
+            <p className="text-xs leading-4 font-medium">Bem-vindo à Kurio</p>
+            <h1 className="mt-1.5 text-lg leading-[29px] font-bold">
               SEJA DONO DA
               <br />
               CULTURA DIGITAL
             </h1>
-            <p className="text-xs leading-4 text-muted-foreground">
+            <p className="mt-1.5 max-w-[188px] text-xs leading-[18px] text-muted-foreground sm:max-w-none">
               Descubra NFTs selecionados de criadores do mundo todo.
             </p>
             <Link
               to="/"
               hash="catalogo"
-              className="inline-flex items-center gap-1 text-xs font-bold text-brand-accent"
+              className="inline-flex h-4 items-center gap-2 self-start text-xs leading-[14px] font-bold text-brand-accent"
             >
-              EXPLORAR <ArrowRight className="size-3.5" aria-hidden="true" />
+              EXPLORAR{' '}
+              <ArrowRight className="size-4 text-primary" strokeWidth={1.5} aria-hidden="true" />
             </Link>
-            <Dots
-              count={slides.length || 3}
-              index={index}
-              onSelect={setIndex}
-              className="mt-auto self-center"
-            />
           </div>
-          <div className="relative w-[42%] max-w-[180px] shrink-0 self-center">
+          {/* 138 px em 414 (Figma); encolhe até 118 px para o texto manter 3 linhas em 390 */}
+          <div className="relative mt-1.5 size-[clamp(118px,calc(100vw-276px),138px)] shrink-0 sm:size-[180px]">
             {current ? (
               <NftImage image={current.image} sizes="180px" priority className="rounded-2xl" />
             ) : (
-              <div className="shimmer aspect-square rounded-2xl" aria-hidden="true" />
+              <div className="shimmer size-full rounded-2xl" aria-hidden="true" />
             )}
-            {/* Miniatura do próximo destaque sobreposta (Figma "Mobile / Início") */}
+            {/* Miniatura do próximo destaque sobre o canto inferior esquerdo (Figma) */}
             {slides.length > 1 ? (
-              <div className="absolute -bottom-1 -left-4 w-[45%] overflow-hidden rounded-xl border-2 border-card">
-                <NftImage
-                  image={slides[(index + 1) % slides.length].image}
-                  alt=""
-                  sizes="80px"
-                />
+              <div className="absolute -bottom-2 left-3.5 size-[58px] overflow-hidden rounded-2xl sm:size-[76px]">
+                <NftImage image={slides[(index + 1) % slides.length].image} alt="" sizes="80px" />
               </div>
             ) : null}
           </div>
+          <Dots
+            count={slides.length || 3}
+            index={index}
+            onSelect={setIndex}
+            variant="compact"
+            className="absolute -bottom-0.5 left-1/2 -translate-x-1/2"
+          />
         </div>
       )}
       <p className="sr-only" aria-live="polite">
@@ -124,14 +132,17 @@ function Dots({
   index,
   onSelect,
   className,
+  variant = 'default',
 }: {
   count: number
   index: number
   onSelect: (i: number) => void
   className?: string
+  /** compact: pontos de 7 px a cada 13 px, como no destaque mobile do Figma. */
+  variant?: 'default' | 'compact'
 }) {
   return (
-    <div className={cn('flex gap-1', className)}>
+    <div className={cn('flex', variant === 'default' && 'gap-1', className)}>
       {Array.from({ length: count }, (_, i) => (
         <button
           key={i}
@@ -139,12 +150,17 @@ function Dots({
           onClick={() => onSelect(i)}
           aria-label={`Mostrar destaque ${i + 1}`}
           aria-current={i === index ? 'true' : undefined}
-          className="grid size-6 place-items-center rounded-full"
+          className={cn(
+            'grid place-items-center rounded-full',
+            variant === 'compact' ? 'h-6 w-[13px]' : 'size-6',
+          )}
         >
           <span
             className={cn(
-              'block size-2 rounded-full bg-primary transition',
-              i === index ? 'scale-125' : 'opacity-50',
+              'block rounded-full bg-primary transition',
+              variant === 'compact'
+                ? cn('size-[7px]', i !== index && 'opacity-55')
+                : cn('size-2', i === index ? 'scale-125' : 'opacity-50'),
             )}
           />
         </button>

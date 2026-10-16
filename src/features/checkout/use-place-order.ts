@@ -8,13 +8,16 @@ import { queryKeys } from '@/api/query-keys'
 /**
  * Envio do pedido com idempotência.
  *
- * - Cada confirmação do usuário gera UMA chave (Idempotency-Key). A tentativa
- *   (chave + corpo) é salva no localStorage antes do envio.
+ * - Cada confirmação gera UMA chave (Idempotency-Key). A tentativa (chave + corpo)
+ *   é salva no localStorage antes do envio.
  * - Timeout ou erro de rede: repetimos com a MESMA chave; o servidor devolve o
  *   mesmo pedido em vez de criar outro.
+ * - Se as repetições se esgotarem, a tentativa continua salva: confirmar de novo
+ *   com o mesmo conteúdo reaproveita a chave (não há compra duplicada).
+ * - Conteúdo diferente gera chave nova. Se a tentativa anterior chegou a criar o
+ *   pedido, o servidor responde ORDER_PENDING e o usuário vai para esse pedido.
  * - Cliques repetidos são ignorados enquanto há envio em andamento.
- * - Após refresh, `resume()` reenvia a tentativa salva (mesma chave) para
- *   recuperar o pedido, sem duplicar a compra.
+ * - Após refresh, `resume()` reenvia a tentativa salva (mesma chave).
  */
 export interface PendingAttempt {
   key: string
@@ -43,6 +46,18 @@ function saveAttempt(userId: string, attempt: PendingAttempt | null) {
   }
 }
 
+/** JSON com chaves ordenadas: o mesmo conteúdo sempre gera o mesmo texto. */
+function stableJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([, v]) => v !== undefined)
+      .sort(([a], [b]) => (a < b ? -1 : 1))
+    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableJson(v)}`).join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
 export type PlaceOrderState =
   | { status: 'idle' }
   | { status: 'submitting'; attempt: number }
@@ -52,7 +67,10 @@ export type PlaceOrderState =
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export function usePlaceOrder(userId: string, onCreated: (order: Order) => void) {
+export function usePlaceOrder(
+  userId: string,
+  onCreated: (order: Order, options: { existing: boolean }) => void,
+) {
   const queryClient = useQueryClient()
   const [state, setState] = useState<PlaceOrderState>({ status: 'idle' })
   const inFlight = useRef(false)
@@ -70,7 +88,7 @@ export function usePlaceOrder(userId: string, onCreated: (order: Order) => void)
             saveAttempt(userId, null)
             queryClient.setQueryData(queryKeys.user.order(userId, order.id), order)
             setState({ status: 'idle' })
-            onCreated(order)
+            onCreated(order, { existing: false })
             return
           } catch (error) {
             const apiError =
@@ -84,14 +102,24 @@ export function usePlaceOrder(userId: string, onCreated: (order: Order) => void)
             if (retryable && i < MAX_RETRIES) {
               // Já avisa que estamos verificando (a espera antes de repetir faz parte da recuperação).
               setState({ status: 'recovering', attempt: i + 1 })
-              console.info(
-                '[checkout] tentativa sem resposta, repetindo com a mesma chave:',
-                apiError.code,
-              )
               await wait(800 * 2 ** i)
               continue
             }
+            // Falha transitória esgotada: a tentativa fica salva para reaproveitar a chave.
             if (!retryable) saveAttempt(userId, null)
+
+            if (apiError.code === 'ORDER_PENDING') {
+              const orderId = (apiError.details as { orderId?: unknown } | undefined)?.orderId
+              if (typeof orderId === 'string') {
+                const existing = await ordersApi.get(orderId).catch(() => null)
+                if (existing) {
+                  queryClient.setQueryData(queryKeys.user.order(userId, existing.id), existing)
+                  setState({ status: 'idle' })
+                  onCreated(existing, { existing: true })
+                  return
+                }
+              }
+            }
             if (apiError.code === 'QUOTE_OUTDATED' || apiError.code === 'AVAILABILITY_CONFLICT') {
               const parsed = Quote.safeParse(
                 (apiError.details as { quote?: unknown } | undefined)?.quote,
@@ -114,9 +142,13 @@ export function usePlaceOrder(userId: string, onCreated: (order: Order) => void)
   )
 
   const submit = useCallback(
-    (body: CreateOrderRequest) =>
-      send({ key: crypto.randomUUID(), body, createdAt: Date.now() }, false),
-    [send],
+    (body: CreateOrderRequest) => {
+      // Mesma confirmação de antes (ex.: depois de um timeout): reaproveita a chave salva.
+      const saved = loadAttempt(userId)
+      if (saved && stableJson(saved.body) === stableJson(body)) return send(saved, true)
+      return send({ key: crypto.randomUUID(), body, createdAt: Date.now() }, false)
+    },
+    [send, userId],
   )
 
   const resume = useCallback(() => {

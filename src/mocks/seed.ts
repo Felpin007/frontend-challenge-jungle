@@ -63,6 +63,14 @@ const COLLECTIONS = [
   { id: 'golden-frequencies', name: 'Golden Frequencies' },
 ]
 
+/** O que se vê em cada uma das 4 artes do Figma. */
+const ART_TRAITS: Record<Art, string[]> = {
+  'emerald-ape': ['Óculos', 'Esmeralda'],
+  'sage-nomad': ['Chapéu', 'Moletom'],
+  'ivory-baron': ['Blazer', 'Gola alta'],
+  'golden-beat': ['Fones', 'Dourado'],
+}
+
 /** NFTs que aparecem no Figma, com nome, número, arte e preço do layout. */
 const FIGMA_NFTS: Array<{
   name: string
@@ -236,18 +244,9 @@ function buildNfts(): NftDetail[] {
       COLLECTIONS[entry.art === 'golden-beat' ? 3 : entry.art === 'sage-nomad' ? 2 : index % 2]
     const image = imageFor(entry.art, fullName)
     const listedAt = new Date(SEED_REFERENCE_DATE - index * 26 * 60 * 60 * 1000).toISOString()
-    const traits = [
-      'Óculos',
-      'Esmeralda',
-      'Raro',
-      'Fones',
-      'Chapéu',
-      'Blazer',
-      'Moletom',
-      'Dourado',
-    ]
-    const attributes = [traits[index % traits.length], traits[(index + 3) % traits.length]]
-    if (entry.rare) attributes.push('Raro')
+    // Atributos coerentes com a arte; o Emerald Ape repete o Figma ("Óculos, Esmeralda, Raro").
+    const attributes = [...ART_TRAITS[entry.art]]
+    if (entry.rare || index === 0) attributes.push('Raro')
 
     return {
       id,
@@ -280,7 +279,10 @@ function buildNfts(): NftDetail[] {
       contract: `0x7A42…${(0x19e8 + index).toString(16).toUpperCase()}`,
       royaltiesPercent: 5,
       rating: (() => {
-        const random = { average: Math.round((4 + rand()) * 10) / 10, count: 3 + Math.floor(rand() * 40) }
+        const random = {
+          average: Math.round((4 + rand()) * 10) / 10,
+          count: 3 + Math.floor(rand() * 40),
+        }
         return index === 0 ? { average: 4.8, count: 19 } : random // Emerald Ape: como no Figma
       })(),
       creator: index % 2 === 0 ? 'Nova Sato' : 'Íris Moura',

@@ -102,7 +102,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
       onClick={() => favorite.toggle(nft.id, nft.name, isFavorite)}
       aria-pressed={isFavorite}
       aria-label={isFavorite ? 'Remover dos favoritos' : 'Favoritar'}
-      className="grid size-9 place-items-center rounded-full bg-accent"
+      className="grid size-[35px] place-items-center rounded-full border border-border bg-secondary"
       data-testid="favorite-toggle-mobile"
     >
       <Heart
@@ -113,9 +113,14 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
   )
 
   return (
-    <article aria-labelledby="nft-title">
-      <MobilePageHeader action={favoriteButton} titleAs="p" />
-      <Container className="flex flex-col gap-16 lg:pt-8">
+    <article aria-labelledby="nft-title" className="relative isolate">
+      {/* Mobile (Figma "Hero"): fundo em gradiente atrás do cabeçalho e da imagem */}
+      <div
+        className="absolute inset-x-0 top-0 -z-10 h-[506px] bg-[linear-gradient(135deg,#241612,#2f1d15)] lg:hidden"
+        aria-hidden="true"
+      />
+      <MobilePageHeader action={favoriteButton} titleAs="p" className="pt-[23px] pb-2" />
+      <Container className="flex flex-col gap-16 lg:gap-24 lg:pt-8">
         <nav aria-label="Trilha de navegação" className="hidden text-[15px] font-bold lg:block">
           <ol className="flex gap-2">
             <li>
@@ -132,7 +137,8 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
           </ol>
         </nav>
 
-        <div className="flex flex-col lg:-mt-[52px] lg:flex-row lg:gap-8">
+        {/* Figma: 12 px entre a trilha e o produto (o gap da página é de 96 px) */}
+        <div className="flex flex-col lg:-mt-[84px] lg:flex-row lg:gap-8">
           {/* Galeria */}
           <div className="flex flex-col-reverse gap-4 lg:flex-row lg:gap-7">
             <ul className="hidden gap-3 lg:flex lg:flex-col lg:gap-4" aria-label="Galeria">
@@ -155,20 +161,21 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
                 </li>
               ))}
             </ul>
-            <div className="relative lg:size-[444px] lg:bg-card lg:p-5">
+            {/* Tablet: imagem limitada a 480 px para o painel de compra aparecer na primeira tela */}
+            <div className="relative max-lg:mx-1 sm:max-lg:mx-auto sm:max-lg:w-full sm:max-lg:max-w-[480px] lg:size-[444px] lg:bg-card lg:p-5">
               <NftImage
                 image={nft.gallery[activeImage] ?? nft.image}
                 sizes="(min-width: 1024px) 404px, 100vw"
                 priority
-                className="rounded-[24px] max-lg:aspect-[362/330]"
+                className="rounded-[24px] max-lg:aspect-[361/356]"
               />
               <button
                 type="button"
                 onClick={() => setZoomOpen(true)}
-                className="absolute top-6 right-6 grid size-8 place-items-center rounded-full bg-background/80 lg:top-7 lg:right-7"
+                className="absolute top-6 right-6 grid size-[30px] place-items-center rounded-full border border-border bg-secondary/90 lg:top-[15px] lg:right-[15px]"
                 aria-label="Ampliar imagem"
               >
-                <ZoomIn className="size-5" aria-hidden="true" />
+                <ZoomIn className="size-4" aria-hidden="true" />
               </button>
               {/* Mobile: galeria por pontos sobre a imagem (o Figma mobile não tem miniaturas) */}
               <div
@@ -198,7 +205,8 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
           </div>
 
           {/* Informações e compra */}
-          <div className="relative z-10 -mt-8 flex flex-1 flex-col gap-4 rounded-t-[32px] bg-card p-6 lg:mt-0 lg:rounded-none lg:bg-transparent lg:p-0">
+          {/* Mobile (Figma "Details Sheet"): painel de ponta a ponta sobre a imagem */}
+          <div className="relative z-10 -mx-6 -mt-[30px] flex flex-1 flex-col gap-3 rounded-t-[31px] bg-card px-6 pt-8 pb-6 lg:mx-0 lg:mt-0 lg:rounded-none lg:bg-transparent lg:p-0">
             <div className="flex items-start justify-between gap-4">
               <h1
                 id="nft-title"
@@ -206,17 +214,23 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
               >
                 {nft.name}
               </h1>
-              <p className="flex shrink-0 items-center gap-1 rounded-full border border-primary px-2 py-0.5 text-sm lg:hidden">
-                <Star className="size-3.5 fill-primary text-primary" aria-hidden="true" />
-                {nft.rating.average.toLocaleString('pt-BR', { minimumFractionDigits: 1 })} (
-                {nft.rating.count})<span className="sr-only"> avaliações</span>
+              <p className="flex h-[27px] shrink-0 items-center gap-1 rounded-full border border-primary px-1.5 text-sm lg:hidden">
+                <Star className="size-3.5 fill-amber text-amber" aria-hidden="true" />
+                <span className="font-medium">
+                  {nft.rating.average.toLocaleString('pt-BR', { minimumFractionDigits: 1 })}
+                </span>
+                <span className="text-muted-foreground">({nft.rating.count})</span>
+                <span className="sr-only"> avaliações</span>
               </p>
             </div>
-            <div className="hidden items-center justify-between gap-4 border-b border-border pb-3 lg:flex">
-              <p className="text-[22px] font-bold text-brand-accent" data-testid="detail-price">
+            <div className="hidden items-center justify-between gap-4 border-b border-primary/30 pb-3 lg:flex">
+              <p
+                className="text-[22px] leading-4 font-bold text-brand-accent"
+                data-testid="detail-price"
+              >
                 {formatEth(edition?.price ?? nft.price)}
               </p>
-              <p className="flex items-center gap-2 text-[15px]">
+              <p className="flex items-center gap-2 text-[15px] leading-5">
                 <span className="flex" aria-hidden="true">
                   {Array.from({ length: 5 }, (_, i) => (
                     <Star
@@ -237,8 +251,8 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <h2 className="hidden font-bold lg:block">Sobre este NFT:</h2>
+            <div className="flex flex-col gap-3">
+              <h2 className="hidden text-[15px] leading-4 font-bold lg:block">Sobre este NFT:</h2>
               <p className="text-sm leading-6 text-muted-foreground">{nft.description}</p>
             </div>
 
@@ -251,17 +265,28 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
               }}
             />
 
-            <div className="hidden items-center justify-between gap-4 lg:flex">
+            <div className="flex items-center gap-4">
               <QuantityStepper
                 value={quantity}
                 max={Math.max(1, maxAddable)}
                 onChange={setQuantity}
                 label={nft.name}
                 disabled={unavailable || maxAddable === 0}
+                className="max-lg:hidden"
               />
-              <div className="flex gap-3">
+              <p
+                className={cn(
+                  'flex-1 text-sm lg:text-xs lg:leading-4',
+                  unavailable || maxAddable === 0 ? 'text-amber' : 'text-muted-foreground',
+                )}
+                aria-live="polite"
+                data-testid="availability"
+              >
+                {limitMessage}
+              </p>
+              <div className="flex gap-2 max-lg:hidden">
                 <Button
-                  className="h-10 w-[130px] font-bold"
+                  className="h-10 w-[130px] rounded-md text-sm font-bold"
                   onClick={() => add({ goToCart: true })}
                   disabled={unavailable || maxAddable === 0 || addToCart.isPending}
                   data-testid="buy-button"
@@ -273,7 +298,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-10 w-[130px] text-[15px]"
+                  className="h-10 w-[130px] rounded-md border-primary text-sm font-medium text-brand-accent"
                   onClick={() => favorite.toggle(nft.id, nft.name, isFavorite)}
                   aria-pressed={isFavorite}
                   data-testid="favorite-toggle"
@@ -286,18 +311,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
                 </Button>
               </div>
             </div>
-            <p
-              className={cn(
-                'text-sm',
-                unavailable || maxAddable === 0 ? 'text-amber' : 'text-muted-foreground',
-              )}
-              aria-live="polite"
-              data-testid="availability"
-            >
-              {limitMessage}
-            </p>
-
-            <dl className="flex flex-col gap-3 text-[15px] text-brand-secondary">
+            <dl className="flex flex-col gap-3 text-[15px] leading-5 text-brand-secondary">
               <div className="flex gap-1">
                 <dt>ID do token:</dt>
                 <dd>{nft.tokenId}</dd>
@@ -319,25 +333,25 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
         <RelatedNfts nft={nft} />
       </Container>
 
-      {/* Barra fixa de compra (mobile) */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-3 rounded-t-[28px] bg-card px-5 pt-4 pb-4 shadow-[0_-8px_24px_rgb(0_0_0/0.35)] lg:hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-sm">Qtd.</span>
+      {/* Barra fixa de compra (mobile, Figma "Buy Bar": 164 px, cantos de 40 px) */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-5 rounded-t-[40px] bg-card px-6 pt-5 pb-[calc(36px+env(safe-area-inset-bottom))] shadow-[0_0_20px_rgb(10_6_4/0.45)] lg:hidden">
+        <div className="flex h-[30px] items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-medium text-muted-foreground">Qtd.</span>
             <QuantityStepper
               value={quantity}
               max={Math.max(1, maxAddable)}
               onChange={setQuantity}
               label={nft.name}
-              size="sm"
+              size="bar"
               disabled={unavailable || maxAddable === 0}
             />
           </div>
-          <EthPrice value={edition?.price ?? nft.price} className="text-xl" />
+          <EthPrice value={edition?.price ?? nft.price} className="text-xl leading-4" />
         </div>
         <div className="flex gap-3">
           <Button
-            className="h-14 flex-1 rounded-full bg-gradient-to-r from-primary to-[#b8743d] text-base font-bold"
+            className="h-[60px] w-[196px] rounded-full bg-[linear-gradient(130deg,#d28a4c,rgb(210_138_76/0.8))] text-base font-bold"
             onClick={() => add({ goToCart: true })}
             disabled={unavailable || maxAddable === 0 || addToCart.isPending}
           >
@@ -345,7 +359,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
           </Button>
           <button
             type="button"
-            className="grid size-14 place-items-center rounded-full bg-accent text-primary disabled:opacity-50"
+            className="grid size-[60px] place-items-center rounded-full border border-border bg-secondary text-brand-secondary hover:text-foreground disabled:opacity-50"
             onClick={() => add({ goToCart: false })}
             disabled={unavailable || maxAddable === 0 || addToCart.isPending}
             aria-label="Adicionar ao carrinho"
@@ -354,7 +368,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
           </button>
         </div>
       </div>
-      <div className="h-44 lg:hidden" aria-hidden="true" />
+      <div className="h-[184px] lg:hidden" aria-hidden="true" />
 
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-[min(90vw,900px)] border-0 bg-card p-4 sm:max-w-[min(90vw,900px)]">
@@ -382,8 +396,8 @@ function EditionPicker({
 }) {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 font-bold">Edição:</legend>
-      <div role="radiogroup" aria-label="Edição" className="flex flex-wrap gap-2">
+      <legend className="mb-2 text-[15px] leading-4 font-bold lg:mb-3">Edição:</legend>
+      <div role="radiogroup" aria-label="Edição" className="flex flex-wrap gap-3 lg:gap-1.5">
         {editions.map((edition) => {
           const soldOut = edition.available === 0
           const selected = edition.id === value
@@ -396,9 +410,9 @@ function EditionPicker({
               aria-disabled={soldOut}
               onClick={() => !soldOut && onChange(edition.id)}
               className={cn(
-                'rounded-full border px-2 py-0.5 text-sm transition',
+                'h-7 min-w-9 rounded-full border px-1 text-sm transition max-lg:min-w-[42px]',
                 selected
-                  ? 'border-primary font-bold text-brand-accent'
+                  ? 'border-primary font-medium text-brand-accent'
                   : 'border-border text-muted-foreground',
                 soldOut ? 'cursor-not-allowed line-through opacity-50' : 'hover:border-primary',
               )}
@@ -459,17 +473,33 @@ function DetailTabs({ nft }: { nft: NftDetail }) {
   const [tab, setTab] = useState<'details' | 'reviews'>('details')
   const tabClass = (active: boolean) =>
     cn(
-      'border-b-[3px] pb-1 text-[17px]',
+      'border-b-[3px] pb-1 text-[15px] lg:text-[17px]',
       active
         ? 'border-primary font-bold text-brand-accent'
         : 'border-transparent hover:text-brand-accent',
     )
+  // Padrão ARIA de abas: setas, Home e End trocam a aba e movem o foco.
+  function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const next =
+      event.key === 'Home'
+        ? 'details'
+        : event.key === 'End'
+          ? 'reviews'
+          : tab === 'details'
+            ? 'reviews'
+            : 'details'
+    setTab(next)
+    document.getElementById(`tab-${next}`)?.focus()
+  }
   return (
     <section className="flex flex-col gap-4">
       <div
         role="tablist"
         aria-label="Informações do NFT"
         className="flex gap-8 border-b border-primary/40"
+        onKeyDown={onKeyDown}
       >
         <button
           type="button"
@@ -477,6 +507,7 @@ function DetailTabs({ nft }: { nft: NftDetail }) {
           id="tab-details"
           aria-controls="panel-details"
           aria-selected={tab === 'details'}
+          tabIndex={tab === 'details' ? 0 : -1}
           onClick={() => setTab('details')}
           className={tabClass(tab === 'details')}
         >
@@ -488,10 +519,14 @@ function DetailTabs({ nft }: { nft: NftDetail }) {
           id="tab-reviews"
           aria-controls="panel-reviews"
           aria-selected={tab === 'reviews'}
+          tabIndex={tab === 'reviews' ? 0 : -1}
           onClick={() => setTab('reviews')}
           className={tabClass(tab === 'reviews')}
         >
-          Avaliações de colecionadores ({nft.rating.count})
+          <span className="lg:hidden">Avaliações ({nft.rating.count})</span>
+          <span className="hidden lg:inline">
+            Avaliações de colecionadores ({nft.rating.count})
+          </span>
         </button>
       </div>
       {tab === 'details' ? (

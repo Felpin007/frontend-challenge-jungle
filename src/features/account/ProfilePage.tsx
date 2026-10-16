@@ -104,7 +104,8 @@ function ProfileForm({ user }: { user: User }) {
         Perfil do colecionador
       </h1>
       <FormError message={formError} />
-      <div className="grid gap-x-7 gap-y-6 md:grid-cols-2">
+      {/* Figma "Perfil do Colecionador": linhas de 103 px (campo de 79 px + 24 px) */}
+      <div className="grid gap-x-7 gap-y-6 md:grid-cols-2 lg:gap-y-[34px]">
         <Field label="Nome de exibição" required error={errors.displayName?.message}>
           {(p) => <Input {...p} autoComplete="name" {...form.register('displayName')} />}
         </Field>

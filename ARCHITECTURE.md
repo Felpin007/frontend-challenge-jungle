@@ -102,6 +102,7 @@ Todo erro segue o envelope:
 | `QUOTE_OUTDATED`                    | 409     | Preço, estoque, cupom ou taxa mudaram desde a cotação (`details.quote` traz a nova)         |
 | `COUPON_INVALID` / `COUPON_EXPIRED` | 422     | Cupom inexistente ou vencido                                                                |
 | `IDEMPOTENCY_CONFLICT`              | 409     | Chave de idempotência reutilizada com outro conteúdo                                        |
+| `ORDER_PENDING`                     | 409     | Já existe um pedido pendente do usuário (`details.orderId` aponta para ele)                 |
 | `WALLET_REJECTED`                   | 403/422 | Carteira recusou a conexão ou não está conectada                                            |
 | `SERVICE_UNAVAILABLE`               | 503     | Falha transitória                                                                           |
 | `INTERNAL_ERROR`                    | 500     | Erro do servidor                                                                            |
@@ -132,7 +133,7 @@ Autenticação: `Authorization: Bearer <token>`. O carrinho do visitante é iden
 |                     | `POST /cart/acknowledge`                                                         | —                                                                                                                                                        | `Cart` (usuário viu as mudanças de preço)                                                                            |
 |                     | `POST /cart/merge`                                                               | `{ guestCartId }`                                                                                                                                        | `Cart` (junta o carrinho do visitante ao da conta)                                                                   |
 | Cotação             | `POST /quotes`                                                                   | `{ network }`                                                                                                                                            | `Quote` (subtotal, desconto, taxa, total, `couponStatus`, `issues`)                                                  |
-| Pedidos             | `POST /orders` + header `Idempotency-Key`                                        | `{ quoteId, walletSessionId, collector }`                                                                                                                | `201 Order` (novo) · `200 Order` (mesma chave) · 409 `QUOTE_OUTDATED`/`AVAILABILITY_CONFLICT`/`IDEMPOTENCY_CONFLICT` |
+| Pedidos             | `POST /orders` + header `Idempotency-Key`                                        | `{ quoteId, walletSessionId, collector }`                                                                                                                | `201 Order` (novo) · `200 Order` (mesma chave) · 409 `QUOTE_OUTDATED`/`AVAILABILITY_CONFLICT`/`IDEMPOTENCY_CONFLICT`/`ORDER_PENDING` |
 |                     | `GET /orders?status=` · `GET /orders/:id`                                        | —                                                                                                                                                        | `{ items }` · `Order` · 403/404                                                                                      |
 | Perfil              | `GET /profile` · `PATCH /profile`                                                | `{ displayName, username, email, ensName, walletNickname }`                                                                                              | `User` · 409 · 422                                                                                                   |
 |                     | `PUT /profile/avatar` · `DELETE /profile/avatar`                                 | `{ dataUrl }` (PNG/JPEG/WEBP ≤ 1 MB)                                                                                                                     | `User` · 422                                                                                                         |
@@ -199,7 +200,7 @@ Toda mudança no banco simulado (vinda de REST, de um timer ou do painel) passa 
 2. **Conectar carteira** (`POST /wallet-sessions`): simula a aprovação na extensão (cerca de 800 ms). No cenário `wallet-rejected` a conexão é recusada. Trocar carteira, rede ou tipo desconecta a sessão anterior.
 3. **"Confirmar compra"** valida o formulário, exige a carteira conectada, busca uma **cotação nova** e abre a revisão.
 4. **"Confirmar e pagar"** gera uma `Idempotency-Key` (UUID) para essa confirmação e salva a tentativa (chave + corpo) no `localStorage` antes de enviar.
-5. **O servidor revalida tudo** contra o estado atual: carrinho, preços, disponibilidade, cupom, taxa e rede da carteira.
+5. **O servidor revalida tudo** contra o estado atual: carrinho, preços, disponibilidade, cupom, taxa e rede da carteira. Antes disso, recusa uma compra nova se o usuário já tiver um pedido pendente (`409 ORDER_PENDING`, ver garantias).
    - Se algo mudou, responde `409 QUOTE_OUTDATED` com a cotação nova. A revisão mostra os valores novos e o usuário precisa confirmar de novo, o que gera uma nova chave.
    - Se algo esgotou, responde `409 AVAILABILITY_CONFLICT`, e a revisão bloqueia a confirmação.
 6. **Pedido criado como `pending`.** O estoque é reservado e a resolução (`confirmed` ou `declined`, conforme o cenário) chega pelo `order.updated`.
@@ -210,8 +211,11 @@ Toda mudança no banco simulado (vinda de REST, de um timer ou do painel) passa 
 
 - **Clique repetido:** o botão fica desabilitado durante o envio, e uma trava (`inFlight`) ignora chamadas concorrentes.
 - **Timeout ou erro de rede:** o cliente avisa ("verificando o pedido") e repete **com a mesma chave**, com backoff de 0,8 s, 1,6 s e 3,2 s. O servidor devolve o pedido já criado (`200`, header `Idempotent-Replayed: true`).
+- **Repetições esgotadas:** a tentativa (chave + corpo) continua salva. Se o usuário confirmar de novo com o mesmo conteúdo, o cliente reaproveita a chave; o servidor devolve o pedido, se ele chegou a ser criado, ou cria agora. A mensagem de erro diz isso, e é verdade (coberto por teste).
+- **Um pedido pendente por usuário:** o carrinho só é baixado quando o pedido confirma, então uma segunda compra com outra chave (ex.: conteúdo diferente depois de um timeout cuja resposta se perdeu) compraria os mesmos itens de novo. O servidor responde `409 ORDER_PENDING` com o id do pedido, e o cliente leva o usuário até ele.
 - **Mesma chave com outro conteúdo:** `409 IDEMPOTENCY_CONFLICT`.
-- **Refresh no meio do envio:** ao voltar ao checkout, a tentativa salva é reenviada com a mesma chave e o usuário cai no pedido existente.
+- **Refresh no meio do envio:** ao voltar ao checkout, a tentativa salva é reenviada com a mesma chave e o usuário cai no pedido existente (coberto por teste).
+- **Revisão aberta e preço mudando:** se um `nft.updated` muda preço, estoque, cupom ou taxa enquanto a revisão está aberta, a cotação ativa é recalculada pela API e a revisão troca para ela na hora, com o aviso "os valores mudaram" e o botão "Confirmar novos valores". Só troca para uma cotação **mais nova** (`createdAt`) que não esteja sendo recarregada. Sem o evento (socket caído), a proteção continua no servidor (`409 QUOTE_OUTDATED`).
 - **Refresh ou queda de conexão com o pedido pendente:** a página do pedido (`/pedidos/:id`) consulta a API ao montar, recebe o `order.updated` e, com o pedido ainda pendente, consulta de novo a cada 5 s como alternativa ao socket.
 - **Confirmação** só aparece quando o servidor responde `status: 'confirmed'`.
 - **O recibo é snapshot:** linhas, preços, desconto, taxa e total ficam gravados no pedido. Mudanças posteriores no catálogo não alteram o recibo (coberto por teste).
@@ -243,6 +247,7 @@ Configuração em [`src/app/query-client.ts`](./src/app/query-client.ts) e chave
 - **A cada conexão, inclusive a primeira**, o cliente invalida as queries ativas de NFTs, carrinho e pedidos. Isso cobre eventos perdidos entre o carregamento via REST e o socket conectar, ou durante uma queda.
 - **Sessão:** existe uma conexão por sessão. Ao trocar de usuário, listeners e conexão são liberados (`removeAllListeners` + `disconnect`). Eventos de pedido só são entregues às conexões do dono, e o cliente ainda confere `data.userId`.
 - **Status de conexão:** depois de 1,5 s sem reconectar, um aviso acessível ("Conexão em tempo real interrompida…") aparece no topo.
+- **Checkout:** a revisão do pedido acompanha os eventos (ver "Revisão aberta e preço mudando" em [Checkout](#checkout-pedidos-e-idempotência)).
 
 ## Valores em ETH
 
@@ -252,7 +257,8 @@ Valores trafegam como **string decimal** (`"1.19"`), validados no contrato. Todo
 
 | Peça                                                                   | Arquivo                                         |
 | ---------------------------------------------------------------------- | ----------------------------------------------- |
-| Banco em memória + persistência no `localStorage` (`kurio:mock-db:v3`) | `mocks/db.ts`                                   |
+| Banco em memória + persistência no `localStorage` (`kurio:mock-db:v4`) | `mocks/db.ts`                                   |
+| Service worker (MSW + recuperação após o navegador encerrá-lo)         | `public/kurio-mock-sw.js`                       |
 | Seed determinístico: PRNG com semente fixa e data de referência fixa   | `mocks/seed.ts`                                 |
 | Regras de negócio (sessões, catálogo, carrinho, cotação, pedidos)      | `mocks/domain/*`                                |
 | Handlers REST                                                          | `mocks/handlers/*`                              |
@@ -280,6 +286,8 @@ Valores trafegam como **string decimal** (`"1.19"`), validados no contrato. Todo
 5. **Ordem de carregamento:** o `engine.io-client` guarda `globalThis.WebSocket` quando o módulo é avaliado. Por isso o `socket.io-client` é importado dinamicamente no `RealtimeProvider`, depois do MSW iniciar. Isso também tira o socket.io do bundle inicial.
 6. Só o namespace padrão, sem acknowledgements e sem binários (limites da binding).
 
+**Service worker encerrado pelo navegador.** Navegadores encerram service workers ociosos (por exemplo, com a aba em segundo plano). O MSW mantém em memória a lista de abas com mocks ativos e, ao reiniciar, passava a mandar `/api/*` para a rede: no deploy, a Vercel respondia 404 e a interface mostrava "Erro inesperado do servidor" até recarregar. O worker registrado é o [`public/kurio-mock-sw.js`](./public/kurio-mock-sw.js), que importa o `mockServiceWorker.js` oficial (sem alterá-lo) e guarda essa lista também no Cache Storage: ela é gravada no `MOCK_ACTIVATE`, apagada no `CLIENT_CLOSED` e restaurada quando o worker reinicia. Uma aba que nunca ativou os mocks continua indo para a rede. Há teste que encerra o worker pelo DevTools Protocol e confere que a API simulada continua respondendo.
+
 **Outras limitações do ambiente de mocks:**
 
 - O "servidor" roda **dentro de cada aba**. Duas abas abertas têm servidores separados que compartilham o `localStorage`: um evento numa aba não chega à outra, e gravações podem se sobrepor. O login e o logout em outra aba são refletidos via evento `storage`.
@@ -294,10 +302,12 @@ Valores trafegam como **string decimal** (`"1.19"`), validados no contrato. Todo
   - landmarks (`header`, `nav`, `main`, `footer`);
   - `h1` por página, inclusive como `sr-only` onde o layout não tem título visível;
   - trilha de navegação com `aria-current`;
-  - abas do catálogo com `role="tablist"`;
+  - abas do catálogo com `role="tablist"`, foco móvel (só a aba ativa entra no Tab) e setas, Home e End;
   - edições como `radiogroup`;
   - quantidade como `group` com valor anunciado;
-  - recibo como tabela com `caption`.
+  - recibo como tabela com `caption`;
+  - resumo de valores como `dl` com um único `div` por par `dt`/`dd`;
+  - níveis de título coerentes (o card de NFT usa `h2` quando está direto sob o `h1`, como em Favoritos).
 - **Formulários:**
   - `label` associado a cada campo;
   - asterisco de obrigatório marcado como `aria-hidden` (a obrigatoriedade é informada pela validação);
@@ -310,6 +320,8 @@ Valores trafegam como **string decimal** (`"1.19"`), validados no contrato. Todo
 - **Imagens:** `alt` descritivo nas artes de NFT; imagens decorativas (blog, miniaturas) com `alt=""`.
 - **Estado não depende só de cor:** esgotado aparece riscado e com texto "esgotada"; o filtro ativo tem checkbox marcado; erros têm ícone e texto.
 - **Movimento reduzido:** `prefers-reduced-motion` desliga o shimmer e as transições. O carrossel não roda sozinho.
+- **Painéis fixos e zoom:** o resumo do carrinho mobile só fica fixo no rodapé quando a tela tem pelo menos 600 px de altura; com zoom alto ou telas baixas, volta ao fluxo da página para nada ficar escondido atrás dele.
+- **Limite de quantidade explicado:** quando o "+" fica desabilitado no carrinho, um texto ligado ao seletor (`aria-describedby`) diz o motivo ("Edição única" ou "Máx. N unidades").
 - **Zoom e overflow:** layouts fluidos; os testes verificam ausência de overflow horizontal em 390, 768 e 1440 px.
 
 **Ajustes em relação ao Figma por acessibilidade:**
@@ -318,6 +330,7 @@ Valores trafegam como **string decimal** (`"1.19"`), validados no contrato. Todo
 - **Borda dos campos:** clareada (`#6b4530`) para chegar a 3:1 de contraste com o fundo.
 - **Filtros:** a lista de coleções e redes virou checkboxes, e a faixa de preço ganhou campos de mínimo e máximo, além do slider. Isso também segue as sugestões dos comentários do Figma.
 - **Botão "−" da quantidade:** fica desabilitado no mínimo, como sugere um comentário do Figma.
+- **Botão "Aplicar" do cupom (mobile):** texto claro sobre o gradiente, como no Figma. O contraste varia de ~3:1 a ~4,5:1 ao longo do gradiente; mantivemos pela fidelidade e reforçamos com uma sombra discreta no texto.
 
 ## Performance e Lighthouse
 
@@ -382,8 +395,13 @@ Ambiente: Lighthouse 13.5.0, HeadlessChrome 156, Node 26, Windows 11, Intel i7-8
 | Ordenação                       | O Figma não define as opções: Listados recentemente, Menor preço, Maior preço, Mais populares e Nome (A–Z).                                                                                                                                                                                                                                                                             |
 | Paginação                       | Botão "anterior" aparece a partir da página 2.                                                                                                                                                                                                                                                                                                                                          |
 | Edições                         | Chips como grupo de opções; edições esgotadas aparecem riscadas e desabilitadas. As miniaturas da galeria são visualizações do mesmo NFT (o seed não tem artes alternativas).                                                                                                                                                                                                           |
+| Disponibilidade no detalhe      | "Disponível: X de Y · máximo de N por pedido" não existe no Figma, mas é exigida pelo enunciado. No desktop fica entre o seletor de quantidade e os botões, para a coluna manter a altura da galeria; no mobile, numa linha própria.                                                                                                                                                   |
+| Margens no mobile               | 24 px na Início e no detalhe e 28 px no carrinho, no pagamento e no login/cadastro, como nos frames mobile.                                                                                                                                                                                                                                                                             |
+| Regra da senha no cadastro      | O Figma não reserva espaço para ela: aparece com o campo de senha em foco ou no erro, e fica sempre ligada ao campo para leitores de tela.                                                                                                                                                                                                                                              |
+| Tablet (768 px)                 | Layout mobile; no detalhe, a imagem é limitada a 480 px para o painel de compra aparecer na primeira tela.                                                                                                                                                                                                                                                                             |
+| Painel de cenários              | Ferramenta de demonstração (não está no Figma): no mobile é uma aba estreita na margem esquerda, para não cobrir conteúdo; no desktop, um botão no canto inferior esquerdo.                                                                                                                                                                                                             |
 | Carrinho                        | Linha mostra "ID do token · edição", porque o mesmo NFT pode estar em edições diferentes. O desenho tinha IDs inconsistentes entre carrinho e pagamento (apontado num comentário); usamos sempre o ID do token do NFT.                                                                                                                                                                  |
-| Pagamento                       | O formulário do Figma mistura dados do colecionador e da carteira. Endereço e ENS/secundária vêm da carteira cadastrada (somente leitura), "Usar outra carteira?" troca para a secundária, e a área "Carteira e rede" virou o painel de conexão (conectar, recusada, desconectar). No mobile, o mesmo conteúdo aparece em uma coluna, com o formulário pré-preenchido.                  |
+| Pagamento                       | O formulário do Figma mistura dados do colecionador e da carteira. Endereço e ENS/secundária vêm da carteira cadastrada (somente leitura) e "Usar outra carteira?" troca para a secundária. Abaixo das opções de "Carteira e rede" há um painel compacto de conexão (conectar, recusada, desconectar), que não existe no Figma. No mobile, os cartões de carteira têm o menu "⋮" do Figma (Editar carteira) e o formulário pré-preenchido vem depois do total. |
 | Revisão do pedido               | Não existe no Figma; é um diálogo no mesmo padrão visual, exigido pelo enunciado (revisão e reconfirmação).                                                                                                                                                                                                                                                                             |
 | Pedido pendente e recusado      | Só o confirmado está desenhado. Pendente e recusado reutilizam o mesmo modal (ícone, título e ações próprias).                                                                                                                                                                                                                                                                          |
 | Perfil                          | Duas ações separadas, "Salvar" (dados) e "Salvar nova senha", em vez de um botão único, para que um erro de senha não bloqueie a edição do perfil e vice-versa.                                                                                                                                                                                                                         |
@@ -403,15 +421,18 @@ Playwright contra o build de produção com mocks, em Chromium desktop (1440) e 
 | 4   | Favoritos com falha de mutation e recuperação                 | `04-favorites.spec.ts`           |
 | 5   | Carrinho, quantidades, remoção, cupom, refresh e login        | `05-cart.spec.ts`                |
 | 6   | Compra completa até o recibo confirmado                       | `06-purchase.spec.ts`            |
-| 7   | Pagamento recusado, clique repetido e timeout com recuperação | `07-payment-failures.spec.ts`    |
+| 7   | Pagamento recusado, clique repetido, timeout com recuperação, repetições esgotadas, refresh no meio do envio e pedido pendente | `07-payment-failures.spec.ts`    |
 | 8   | Perfil, avatar, senha e carteiras com validação               | `08-account.spec.ts`             |
-| 9   | Preço/disponibilidade via Socket.IO durante o checkout        | `09-realtime-checkout.spec.ts`   |
+| 9   | Preço/disponibilidade via Socket.IO durante o checkout (revisão atualizada pelo evento e recusa do servidor com o socket caído) | `09-realtime-checkout.spec.ts`   |
 | 10  | Eventos duplicados/antigos, desconexão e pedido pendente      | `10-realtime-resilience.spec.ts` |
 | 11  | Teclado, foco em diálogos e validação                         | `11-a11y.spec.ts`                |
-| 12  | Skeletons, falha e nova tentativa                             | `12-loading.spec.ts`             |
-| —   | Regressão visual (Início, Detalhe, Carrinho, Pagamento)       | `tests/visual/`                  |
+| 12  | Skeletons, falha e nova tentativa (inclui cotação com erro e service worker encerrado pelo navegador) | `12-loading.spec.ts`             |
+| —   | Sem overflow horizontal em 390, 720, 768 e 1440 px            | `13-responsive.spec.ts`          |
+| —   | Regressão visual (Início, Detalhe, Carrinho, Pagamento) em desktop (1440) e mobile (390) | `tests/visual/`                  |
 
 Relatório HTML em `playwright-report/`; traces e screenshots das falhas em `test-results/` (`trace: 'retain-on-failure'`).
+
+O teste de eventos duplicados atrasa o recarregamento do carrinho para que um evento reaplicado gerasse um segundo aviso: ele falha se a proteção (`EventGuard`) for removida. As baselines visuais são por plataforma (ver [Limitações](#limitações-e-o-que-ficou-de-fora)).
 
 ## Limitações e o que ficou de fora
 
@@ -420,6 +441,7 @@ Relatório HTML em `playwright-report/`; traces e screenshots das falhas em `tes
 - **Login social, recuperação de senha, newsletter e páginas editoriais** estão fora do escopo do enunciado e ficam desabilitados.
 - **Avaliações de colecionadores:** só a nota média e a contagem; comentários individuais estão fora do escopo.
 - **Galeria:** as 4 miniaturas usam a mesma arte, porque o arquivo do Figma não tem variações.
-- **"Mais desta coleção" / "Colecionadores também viram"** mostram os NFTs mais populares, sem algoritmo de recomendação. Os pontos de paginação desse carrossel não foram implementados: no mobile a lista rola na horizontal.
+- **"Mais desta coleção" / "Colecionadores também viram"** mostram primeiro os NFTs da mesma categoria e completam com os mais populares, sem algoritmo de recomendação. O carrossel tem 5 cartões por página e pontos de paginação; no mobile a lista rola na horizontal.
 - **Segurança simplificada no mock:** token em `localStorage` (num backend real, cookie `HttpOnly`) e hash de senha com SHA-256 + salt (num backend real, bcrypt/argon2).
 - **Testes só em Chromium**, como pede o enunciado; Firefox e WebKit não foram verificados.
+- **Baselines visuais só para Windows.** A renderização de fontes muda entre sistemas, então as baselines ficam em `tests/visual/__screenshots__/<projeto>/<plataforma>/`. Em outra plataforma, os testes visuais são pulados com a instrução para gerar as baselines (`npm run test:visual:update`), em vez de falharem por antialiasing.

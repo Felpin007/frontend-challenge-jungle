@@ -5,7 +5,7 @@ import { createOrder, findOrder, resolveIfDue, toOrder } from '../domain/orders'
 import { apiError, authenticate, parseBody, simulate } from '../mock-http'
 import { getScenario } from '../scenarios'
 
-/** Maior que o timeout do cliente para criação de pedido (ver src/api/orders.ts). */
+/** Maior que o timeout do cliente para criação de pedido (CREATE_ORDER_TIMEOUT_MS em src/api/endpoints.ts). */
 export const ORDER_TIMEOUT_DELAY_MS = 15_000
 
 export const orderHandlers = [

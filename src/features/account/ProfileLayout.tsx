@@ -32,7 +32,8 @@ export function ProfileLayout() {
       <Container className="flex flex-col gap-7 lg:flex-row lg:pt-8">
         <nav aria-label="Meu perfil" className="shrink-0 bg-card lg:w-[310px] lg:self-start">
           <p className="hidden px-2.5 pt-5 pb-2 text-lg font-bold lg:block">Meu perfil</p>
-          <ul className="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:gap-0 lg:p-0">
+          {/* Mobile: os itens quebram em linhas (sem rolagem lateral que corta rótulos) */}
+          <ul className="flex flex-wrap gap-1 p-2 lg:flex-col lg:flex-nowrap lg:gap-0 lg:p-0">
             <NavItem to="/perfil" active={pathname === '/perfil'} icon={<User />}>
               Dados do perfil
             </NavItem>

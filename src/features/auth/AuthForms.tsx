@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { LoginRequest, RegisterRequest } from '@/api/contracts'
+import { LoginRequest, PASSWORD_RULES, RegisterRequest } from '@/api/contracts'
 import { ApiError } from '@/api/http'
 import { ComingSoon } from '@/components/common/ComingSoon'
 import { applyServerErrors, Field, FormError, PasswordInput } from '@/components/forms/Field'
@@ -47,7 +47,12 @@ export function LoginForm({ search }: { search: AuthSearch }) {
   })
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4" aria-label="Entrar">
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="flex flex-col gap-3 lg:gap-4"
+      aria-label="Entrar"
+    >
       {search.reason === 'expired' ? (
         <p
           role="status"
@@ -88,7 +93,12 @@ export function LoginForm({ search }: { search: AuthSearch }) {
           Esqueceu a senha?
         </ComingSoon>
       </div>
-      <Button type="submit" className="mt-2 h-11 text-base font-bold max-lg:h-[60px] max-lg:rounded-[10px]" disabled={login.isPending}>
+      {/* Mobile (Figma): 40 px entre o formulário e o botão */}
+      <Button
+        type="submit"
+        className="mt-2 h-11 text-base font-bold max-lg:mt-7 max-lg:h-[60px] max-lg:rounded-[10px]"
+        disabled={login.isPending}
+      >
         {login.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
         Entrar
       </Button>
@@ -134,7 +144,7 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3" aria-label="Criar conta">
       <FormError message={formError} />
-      <Field label="Nome de usuário" srOnlyLabel error={errors.username?.message} hint={undefined}>
+      <Field label="Nome de usuário" srOnlyLabel error={errors.username?.message}>
         {(props) => (
           <Input
             {...props}
@@ -157,7 +167,15 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
           />
         )}
       </Field>
-      <Field label="Senha" srOnlyLabel error={errors.password?.message}>
+      {/* A regra da senha aparece com o campo em foco (o Figma não reserva espaço para ela) */}
+      <Field
+        label="Senha"
+        srOnlyLabel
+        error={errors.password?.message}
+        hint={`Senha: ${PASSWORD_RULES.toLowerCase()}.`}
+        hintClassName="hidden group-focus-within/password:block"
+        className="group/password"
+      >
         {(props) => (
           <PasswordInput
             {...props}
@@ -179,10 +197,11 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
           />
         )}
       </Field>
-      <p className="text-xs text-muted-foreground">
-        Senha: mínimo de 8 caracteres, com letra e número.
-      </p>
-      <Button type="submit" className="mt-2 h-11 text-base font-bold max-lg:h-[60px] max-lg:rounded-[10px]" disabled={register.isPending}>
+      <Button
+        type="submit"
+        className="mt-2 h-11 text-base font-bold max-lg:mt-7 max-lg:h-[60px] max-lg:rounded-[10px]"
+        disabled={register.isPending}
+      >
         {register.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
         {submitLabel}
       </Button>

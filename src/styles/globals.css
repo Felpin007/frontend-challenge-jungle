@@ -76,6 +76,13 @@
   --breakpoint-xs: 26rem;
 }
 
+/*
+ * Painéis fixos no rodapé das telas mobile (resumo do carrinho): só ficam fixos
+ * quando sobra altura para o conteúdo. Em telas baixas ou com zoom alto, voltam
+ * ao fluxo normal da página para nada ficar escondido atrás deles.
+ */
+@custom-variant sheet-fixed (@media (width < 64rem) and (height >= 37.5rem));
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

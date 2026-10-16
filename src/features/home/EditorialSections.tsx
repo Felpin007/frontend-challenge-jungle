@@ -5,17 +5,17 @@ import { NftImage } from '@/components/nft/NftImage'
 
 const art = (name: string, alt: string) => ({ src: `/nfts/${name}-800.webp`, alt })
 
-/** Cards promocionais: levam a recortes reais do catálogo. */
+/** Cards promocionais (Figma "Promos", 586 × 250): levam a recortes reais do catálogo. */
 export function PromoCards() {
   const promos = [
     {
-      title: 'Lançamentos gênesis de edição limitada',
+      title: ['Lançamentos gênesis', 'de edição limitada'],
       text: 'Colecione edições escassas diretamente dos criadores antes da revelação pública.',
       image: art('emerald-ape', 'Macaco com óculos verdes e jaqueta college'),
       search: { tab: 'new' as const },
     },
     {
-      title: 'Arte digital selecionada e muito mais',
+      title: ['Arte digital selecionada', 'e muito mais'],
       text: 'Explore novos artistas, coleções verificadas e obras digitais que definem a cultura.',
       image: art('ivory-baron', 'Macaco de blazer marfim e gola alta verde'),
       search: { categories: 'arte-digital' },
@@ -27,27 +27,45 @@ export function PromoCards() {
       className="grid gap-7 [contain-intrinsic-size:auto_250px] [content-visibility:auto] md:grid-cols-2"
     >
       {promos.map((promo) => (
-        <article key={promo.title} className="flex overflow-hidden rounded-lg bg-card md:h-[250px]">
-          <div className="w-1/2 shrink-0 overflow-hidden rounded-[18px] md:w-[292px]">
+        <article
+          key={promo.title.join(' ')}
+          className="relative isolate flex overflow-hidden rounded-lg bg-card md:h-[250px]"
+        >
+          <div className="w-1/2 shrink-0 overflow-hidden rounded-[17px] md:w-[287px]">
             <NftImage
               image={promo.image}
               sizes="(min-width: 768px) 290px, 50vw"
               className="h-full"
             />
           </div>
-          <div className="flex flex-1 flex-col items-end gap-2 py-4 pr-4 pl-2 text-right sm:py-9 sm:pr-7">
-            <h2 className="text-base leading-6 font-bold sm:text-lg">{promo.title}</h2>
-            <p className="text-sm leading-4 text-muted-foreground">{promo.text}</p>
+          <div className="flex min-w-0 flex-1 flex-col items-end py-4 pr-4 pl-3 text-right sm:pt-[37px] sm:pr-[30px] sm:pb-[46px] md:pl-1">
+            <h2 className="text-base leading-6 font-bold sm:text-lg">
+              {promo.title[0]}
+              <br />
+              {promo.title[1]}
+            </h2>
+            <p className="mt-2 max-w-[263px] text-sm leading-6 text-muted-foreground">
+              {promo.text}
+            </p>
             <Link
               to="/"
               search={promo.search}
               hash="catalogo"
-              className="mt-auto inline-flex h-10 items-center gap-1 rounded-md bg-primary px-6 font-medium text-primary-foreground hover:bg-primary/90"
+              className="mt-auto inline-flex h-10 w-[140px] shrink-0 items-center justify-center gap-1 rounded-md bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 max-sm:mt-3"
             >
-              Explorar <ArrowRight className="size-4" aria-hidden="true" />
-              <span className="sr-only">{promo.title}</span>
+              Explorar <ArrowRight className="size-[18px]" aria-hidden="true" />
+              <span className="sr-only">{promo.title.join(' ')}</span>
             </Link>
           </div>
+          {/* Anéis decorativos do Figma ("Mask Group"): arcos laranja sobre o canto da imagem */}
+          <span
+            className="pointer-events-none absolute top-[142px] left-[-191px] size-64 rounded-full border-2 border-primary max-md:hidden"
+            aria-hidden="true"
+          />
+          <span
+            className="pointer-events-none absolute top-[134px] left-[-199px] size-64 rounded-full border border-primary max-md:hidden"
+            aria-hidden="true"
+          />
         </article>
       ))}
     </section>
@@ -100,7 +118,8 @@ export function BlogSection() {
           Histórias, guias e insights para colecionadores sobre o universo da propriedade digital.
         </p>
       </header>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Figma: 4 cartões de 268 px (a fileira não ocupa os 1200 px inteiros) */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[repeat(4,268px)]">
         {POSTS.map((post) => (
           <article key={post.title} className="flex flex-col overflow-hidden rounded-lg bg-card">
             <div className="h-[195px] overflow-hidden">
@@ -112,11 +131,14 @@ export function BlogSection() {
               />
             </div>
             <div className="flex flex-1 flex-col gap-2 px-4 pt-3 pb-4">
-              <p className="text-xs font-medium text-muted-foreground">
-                <time>{post.date}</time> <span aria-hidden="true">|</span> Leitura de {post.read}
+              <p className="text-xs leading-4 font-medium whitespace-pre-wrap text-muted-foreground">
+                <time>{post.date}</time>
+                {'  '}
+                <span aria-hidden="true">|</span>
+                {'  '}Leitura de {post.read}
               </p>
               <h3 className="text-base leading-[21px] font-bold">{post.title}</h3>
-              <p className="text-xs font-medium text-muted-foreground">{post.text}</p>
+              <p className="text-xs leading-4 font-medium text-muted-foreground">{post.text}</p>
               <ComingSoon
                 className="mt-auto text-xs font-bold text-brand-accent"
                 label="Artigos disponíveis em breve"

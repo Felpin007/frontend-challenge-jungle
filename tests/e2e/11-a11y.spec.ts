@@ -90,4 +90,22 @@ test.describe('acessibilidade', () => {
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/$/)
   })
+
+  test('abas do catálogo: setas movem o foco e trocam a aba', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByTestId('nft-card').first()).toBeVisible()
+    const all = page.getByRole('tab', { name: 'Todos os NFTs' })
+    await all.focus()
+    await page.keyboard.press('ArrowRight')
+    const newer = page.getByRole('tab', { name: 'Novos lançamentos' })
+    await expect(newer).toBeFocused()
+    await expect(newer).toHaveAttribute('aria-selected', 'true')
+    await expect(page).toHaveURL(/tab=new/)
+    await page.keyboard.press('End')
+    await expect(page.getByRole('tab', { name: 'Em alta' })).toBeFocused()
+    await page.keyboard.press('Home')
+    await expect(all).toBeFocused()
+    // Só a aba ativa entra na ordem de tabulação
+    await expect(newer).toHaveAttribute('tabindex', '-1')
+  })
 })

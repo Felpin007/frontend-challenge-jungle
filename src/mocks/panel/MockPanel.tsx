@@ -50,13 +50,15 @@ export default function MockPanel() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
+        {/* Mobile: aba estreita (18 px) dentro da margem lateral, para não cobrir conteúdo.
+            Desktop: botão no canto inferior esquerdo; o rótulo só aparece com margem de sobra. */}
         <button
           type="button"
-          className="fixed top-[45%] left-0 z-50 flex items-center gap-2 rounded-r-full border border-l-0 border-primary/60 bg-card px-2 py-2 text-xs font-bold text-brand-accent shadow-lg lg:top-auto lg:bottom-4 lg:left-3 lg:rounded-full lg:border-l lg:px-3"
+          className="fixed top-[45%] left-0 z-50 flex h-11 w-[18px] items-center justify-center rounded-r-lg border border-l-0 border-primary/50 bg-card text-xs font-bold text-brand-accent opacity-80 shadow-lg hover:opacity-100 focus-visible:opacity-100 lg:top-auto lg:bottom-4 lg:left-3 lg:h-9 lg:w-auto lg:gap-2 lg:rounded-full lg:border-l lg:px-2.5 xl:px-3"
           data-testid="mock-panel-trigger"
         >
-          <FlaskConical className="size-4" aria-hidden="true" />
-          <span className="max-lg:sr-only">Cenários</span>
+          <FlaskConical className="size-3.5 shrink-0 lg:size-4" aria-hidden="true" />
+          <span className="sr-only xl:not-sr-only">Cenários</span>
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[340px] overflow-y-auto bg-card">

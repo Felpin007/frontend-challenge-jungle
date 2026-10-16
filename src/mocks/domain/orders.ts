@@ -19,6 +19,7 @@ export type CreateOrderResult =
       status: number
       code:
         | 'IDEMPOTENCY_CONFLICT'
+        | 'ORDER_PENDING'
         | 'QUOTE_OUTDATED'
         | 'AVAILABILITY_CONFLICT'
         | 'NOT_FOUND'
@@ -56,7 +57,23 @@ export function createOrder(
     if (order) return { kind: 'replayed', order: resolveIfDue(order) }
   }
 
-  // 2. Revalida a cotação contra o estado atual do carrinho e do catálogo.
+  // 2. Um pedido pendente por usuário: o carrinho só é baixado quando o pedido confirma,
+  //    então uma segunda compra com outra chave (ex.: após um timeout em que a primeira
+  //    resposta se perdeu) compraria os mesmos itens de novo.
+  const pending = state.orders.find(
+    (o) => o.userId === userId && resolveIfDue(o).status === 'pending',
+  )
+  if (pending) {
+    return {
+      kind: 'error',
+      status: 409,
+      code: 'ORDER_PENDING',
+      message: 'Você já tem um pedido aguardando confirmação. Acompanhe o pedido em andamento.',
+      details: { orderId: pending.id },
+    }
+  }
+
+  // 3. Revalida a cotação contra o estado atual do carrinho e do catálogo.
   const quote = state.quotes.find((q) => q.id === body.quoteId && q.userId === userId)
   const cart = findCart({ type: 'user', userId })
   if (!cart || cart.items.length === 0) {
@@ -106,7 +123,7 @@ export function createOrder(
     }
   }
 
-  // 3. Cria o pedido pendente e reserva o estoque.
+  // 4. Cria o pedido pendente e reserva o estoque.
   const wallet = state.wallets.find((w) => w.id === session.walletId)
   const at = nowIso()
   const order: OrderRecord = {

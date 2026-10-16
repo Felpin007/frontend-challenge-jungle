@@ -85,7 +85,7 @@ export interface DbState {
 }
 
 /** Incrementar quando o formato do banco mudar: dados antigos são descartados. */
-export const DB_SCHEMA_VERSION = 3
+export const DB_SCHEMA_VERSION = 4
 export const DB_STORAGE_KEY = `kurio:mock-db:v${DB_SCHEMA_VERSION}`
 
 let state: DbState | null = null

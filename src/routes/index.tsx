@@ -22,8 +22,9 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
   return (
-    <Container className="flex flex-col gap-24 pt-6 lg:pt-8">
-      <div className="flex flex-col gap-6 lg:gap-24">
+    <Container className="flex flex-col gap-24 pt-10 lg:pt-8">
+      {/* Mobile (Figma): busca, destaque, abas e grade separados por 16 px */}
+      <div className="flex flex-col gap-4 lg:gap-24">
         <MobileSearchBar />
         <HeroCarousel />
         <CatalogSection />

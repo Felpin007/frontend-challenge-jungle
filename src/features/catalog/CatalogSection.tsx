@@ -49,7 +49,7 @@ export function CatalogSection() {
             <SpotlightCard />
           </aside>
         ) : null}
-        <div className="flex min-w-0 flex-1 flex-col gap-8">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 lg:gap-8">
           <CatalogToolbar />
           <ActiveSearchChip />
           <CatalogResults list={list} />
@@ -64,23 +64,63 @@ function CatalogToolbar() {
   const activeTab = search.tab ?? 'all'
   // No mobile/tablet a ordenação fica na gaveta de filtros (o Figma mobile só tem as abas)
   const isDesktop = useIsDesktop()
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+
+  function select(tab: (typeof CATALOG_TABS)[number]) {
+    update({ tab: tab === 'all' ? undefined : tab })
+  }
+
+  // Padrão ARIA de abas: setas, Home e End movem o foco e ativam a aba (ativação automática).
+  function onKeyDown(event: React.KeyboardEvent, index: number) {
+    const last = CATALOG_TABS.length - 1
+    const next =
+      event.key === 'ArrowRight'
+        ? index === last
+          ? 0
+          : index + 1
+        : event.key === 'ArrowLeft'
+          ? index === 0
+            ? last
+            : index - 1
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? last
+              : null
+    if (next === null) return
+    event.preventDefault()
+    tabRefs.current[next]?.focus()
+    select(CATALOG_TABS[next])
+  }
+
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div role="tablist" aria-label="Seções do catálogo" className="flex gap-5 overflow-x-auto">
-        {CATALOG_TABS.map((tab) => {
+      <div
+        role="tablist"
+        aria-label="Seções do catálogo"
+        className="flex gap-4 overflow-x-auto lg:gap-5"
+      >
+        {CATALOG_TABS.map((tab, index) => {
           const selected = activeTab === tab
           return (
             <button
               key={tab}
+              ref={(el) => {
+                tabRefs.current[index] = el
+              }}
               type="button"
               role="tab"
+              id={`catalog-tab-${tab}`}
               aria-selected={selected}
               aria-controls="catalog-results"
-              onClick={() => update({ tab: tab === 'all' ? undefined : tab })}
+              tabIndex={selected ? 0 : -1}
+              onClick={() => select(tab)}
+              onKeyDown={(event) => onKeyDown(event, index)}
               className={cn(
-                'shrink-0 border-b-2 pb-1 text-[15px] font-medium whitespace-nowrap',
+                // Mobile (Figma): 14 px, aba ativa em negrito com traço de 2 px; desktop: 15 px
+                'shrink-0 border-b-2 pb-1 text-sm leading-4 whitespace-nowrap lg:text-[15px] lg:leading-normal lg:font-medium',
                 selected
-                  ? 'border-primary text-brand-accent'
+                  ? 'border-primary font-bold text-brand-accent lg:font-medium'
                   : 'border-transparent hover:text-brand-accent',
               )}
             >
@@ -216,6 +256,7 @@ function CatalogResults({ list }: { list: ReturnType<typeof useQuery<NftListResp
       ref={resultsRef}
       id="catalog-results"
       role="tabpanel"
+      aria-labelledby={`catalog-tab-${search.tab ?? 'all'}`}
       className={cn(
         'flex scroll-mt-6 flex-col gap-12 transition-opacity',
         isUpdating && 'opacity-60',
@@ -245,8 +286,8 @@ function CatalogResults({ list }: { list: ReturnType<typeof useQuery<NftListResp
 function Grid({ children, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
-      // Mobile (2 colunas): coluna da direita deslocada, como o mosaico do Figma
-      className="grid grid-cols-2 gap-x-4 gap-y-8 max-sm:[&>*:nth-child(even)]:mt-8 sm:grid-cols-3 lg:gap-x-8 lg:gap-y-[72px]"
+      // Mobile (2 colunas): coluna da direita deslocada 32 px, como o mosaico do Figma
+      className="grid grid-cols-2 gap-x-4 gap-y-6 max-sm:pb-8 sm:grid-cols-3 sm:gap-y-8 lg:gap-x-8 lg:gap-y-[72px] max-sm:[&>*:nth-child(even)]:translate-y-8"
       {...props}
     >
       {children}
@@ -339,13 +380,14 @@ export function MobileSearchBar() {
   }, [term])
 
   return (
-    <div className="flex gap-3 lg:hidden">
+    <div className="flex gap-2 lg:hidden">
       <form role="search" className="relative flex-1" onSubmit={(e) => e.preventDefault()}>
         <label htmlFor="mobile-search" className="sr-only">
           Explorar coleções
         </label>
         <Search
-          className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-brand-secondary"
+          className="pointer-events-none absolute top-1/2 left-3 size-[22px] -translate-y-1/2 text-brand-secondary"
+          strokeWidth={2.25}
           aria-hidden="true"
         />
         <input
@@ -354,14 +396,14 @@ export function MobileSearchBar() {
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder="Explorar coleções"
-          className="h-11 w-full rounded-xl bg-card pr-4 pl-12 text-[15px] placeholder:text-brand-secondary"
+          className="h-[45px] w-full rounded-[10px] bg-card pr-4 pl-[42px] text-sm placeholder:font-bold placeholder:text-brand-secondary"
         />
       </form>
       <Sheet>
         <SheetTrigger asChild>
           <button
             type="button"
-            className="relative grid size-11 place-items-center rounded-xl bg-primary text-primary-foreground"
+            className="relative grid size-[45px] shrink-0 place-items-center rounded-[14px] bg-[linear-gradient(135deg,rgb(210_138_76/0.45),#d28a4c_80%)] text-primary-foreground"
             aria-label={activeFilterCount ? `Filtros (${activeFilterCount} ativos)` : 'Filtros'}
           >
             <SlidersHorizontal className="size-5" aria-hidden="true" />

@@ -1,8 +1,10 @@
+import type { UseQueryResult } from '@tanstack/react-query'
 import { Loader2, X } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import type { Cart, Quote } from '@/api/contracts'
 import { ApiError } from '@/api/http'
+import { ErrorState } from '@/components/feedback/States'
 import { Button } from '@/components/ui/button'
 import { formatEth } from '@/lib/money'
 import { cn } from '@/lib/utils'
@@ -72,7 +74,14 @@ export function CouponForm({
       >
         Código promocional
       </label>
-      <div className={cn('flex', variant === 'mobile' && 'rounded-full bg-background p-1')}>
+      <div
+        className={cn(
+          'flex',
+          // Figma "Promo Input" (mobile): pílula de 50 px com borda, sombra e botão sobreposto
+          variant === 'mobile' &&
+            'h-[50px] rounded-full border border-border bg-card shadow-[0_6px_20px_rgb(10_6_4/0.45)] focus-within:border-ring',
+        )}
+      >
         <input
           id={inputId}
           value={code}
@@ -81,8 +90,10 @@ export function CouponForm({
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            'h-10 min-w-0 flex-1 bg-transparent px-2 placeholder:text-brand-secondary',
-            variant === 'desktop' ? 'rounded-l-[3px] border border-r-0 border-primary text-xs' : 'px-4 text-sm',
+            'min-w-0 flex-1 bg-transparent text-ellipsis placeholder:text-brand-secondary',
+            variant === 'desktop'
+              ? 'h-10 rounded-l-[3px] border border-r-0 border-primary px-2 text-xs'
+              : 'h-full rounded-l-full pr-2 pl-3 text-[13px] tracking-[-0.01em] outline-none min-[400px]:pl-4',
           )}
           data-testid="coupon-input"
         />
@@ -90,10 +101,10 @@ export function CouponForm({
           type="submit"
           disabled={apply.isPending}
           className={cn(
-            'h-10 px-5 text-base font-bold',
+            'font-bold',
             variant === 'desktop'
-              ? 'rounded-l-none rounded-r-[3px]'
-              : 'h-11 rounded-full bg-linear-to-r from-primary to-[#b8743d]',
+              ? 'h-10 rounded-l-none rounded-r-[3px] px-5 text-base'
+              : '-my-px -mr-px h-[50px] w-[97px] shrink-0 rounded-full bg-[linear-gradient(135deg,rgb(210_138_76/0.54),#d28a4c)] text-[15px] text-foreground hover:bg-[linear-gradient(135deg,rgb(210_138_76/0.7),#d28a4c)]',
           )}
         >
           {apply.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
@@ -106,6 +117,48 @@ export function CouponForm({
         </p>
       ) : null}
     </form>
+  )
+}
+
+/**
+ * Resumo de valores ligado à consulta da cotação: skeleton enquanto carrega,
+ * erro com nova tentativa quando não há cotação válida, e aviso discreto quando
+ * só a atualização em segundo plano falhou (os últimos valores continuam à vista).
+ */
+export function QuoteSummary({
+  quote,
+  className,
+}: {
+  quote: UseQueryResult<Quote>
+  className?: string
+}) {
+  if (quote.isError && !quote.data) {
+    return (
+      <ErrorState
+        error={quote.error}
+        title="Não foi possível calcular os valores"
+        onRetry={() => void quote.refetch()}
+        retrying={quote.isFetching}
+        className={cn('py-6', className)}
+      />
+    )
+  }
+  return (
+    <div className={cn('flex flex-col gap-3', className)}>
+      {quote.isError ? (
+        <p role="alert" className="text-sm text-destructive">
+          Não foi possível atualizar os valores.{' '}
+          <button type="button" className="underline" onClick={() => void quote.refetch()}>
+            Tentar novamente
+          </button>
+        </p>
+      ) : null}
+      <QuoteTotals
+        quote={quote.data}
+        loading={quote.isPending}
+        updating={quote.isFetching && quote.isPlaceholderData}
+      />
+    </div>
   )
 }
 
@@ -152,29 +205,33 @@ export function QuoteTotals({
           foi aplicado.
         </p>
       ) : null}
-      <dl className="flex flex-col gap-3 text-[15px]">
-        <div className="flex justify-between">
+      {/* Cada par dt/dd fica em uma única div (único agrupamento válido dentro de dl). */}
+      <dl className="flex flex-col gap-3 text-[15px] max-lg:leading-5">
+        <div className="flex justify-between gap-4">
           <dt>Subtotal</dt>
-          <dd className="text-lg" data-testid="quote-subtotal">
+          <dd className="text-base lg:text-lg" data-testid="quote-subtotal">
             {formatEth(quote.subtotal)}
           </dd>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-4">
           <dt>Desconto do lançamento{quote.coupon ? ` (${quote.coupon.percentOff}%)` : ''}</dt>
           <dd data-testid="quote-discount">(-) {formatEth(quote.discount)}</dd>
         </div>
-        <div className="flex flex-col">
-          <div className="flex justify-between">
-            <dt>Taxa de rede</dt>
-            <dd className="text-lg" data-testid="quote-fee">
+        <div className="flex justify-between gap-4">
+          <dt>Taxa de rede</dt>
+          <dd className="flex flex-col items-end">
+            <span className="text-base lg:text-lg" data-testid="quote-fee">
               {formatEth(quote.networkFee)}
-            </dd>
-          </div>
-          <p className="self-end text-xs text-brand-accent">Taxa estimada</p>
+            </span>
+            <span className="text-xs leading-4 text-brand-accent">Taxa estimada</span>
+          </dd>
         </div>
-        <div className="mt-2 flex justify-between border-t border-border pt-4">
-          <dt className="font-bold">Total</dt>
-          <dd className="text-lg font-bold text-brand-accent" data-testid="quote-total">
+        <div className="mt-2 flex justify-between gap-4 border-t border-border pt-4 max-lg:mt-0 max-lg:border-0 max-lg:pt-0">
+          <dt className="font-bold max-lg:text-base max-lg:leading-4">Total</dt>
+          <dd
+            className="text-lg font-bold text-brand-accent max-lg:leading-4"
+            data-testid="quote-total"
+          >
             {formatEth(quote.total)}
           </dd>
         </div>

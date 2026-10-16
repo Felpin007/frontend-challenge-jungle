@@ -12,7 +12,20 @@ import { NftImage } from './NftImage'
 const actionClass =
   'grid size-9 place-items-center rounded-sm border border-primary/40 bg-background/90 text-foreground transition hover:text-primary focus-visible:opacity-100 disabled:opacity-60'
 
-export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?: boolean }) {
+/** compact: textos menores, como nos carrosséis "Mais desta coleção" do Figma. */
+export function NftCard({
+  nft,
+  priority = false,
+  size = 'default',
+  headingLevel = 3,
+}: {
+  nft: NftSummary
+  priority?: boolean
+  size?: 'default' | 'compact'
+  /** Nível do título no contexto da página (h3 sob uma seção com h2; h2 direto sob o h1). */
+  headingLevel?: 2 | 3
+}) {
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
   const isFavorite = useIsFavorite(nft.id)
   const favorite = useToggleFavorite()
   const addToCart = useAddToCart()
@@ -34,16 +47,22 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
 
   return (
     <article
-      className="group relative flex flex-col gap-3"
+      className="group relative flex flex-col gap-2 lg:gap-3"
       data-testid="nft-card"
       data-nft-id={nft.id}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-card p-1 lg:rounded-none lg:px-1 lg:pt-6 lg:pb-[26px]">
+      {/* Mobile (Figma "Mobile / Início"): moldura em gradiente, cantos de 20 px */}
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,#241612,#2f1d15)] px-1 pt-3 pb-5 lg:rounded-none lg:bg-card lg:bg-none',
+          size === 'default' ? 'lg:pt-6 lg:pb-[26px]' : 'lg:pt-5 lg:pb-6',
+        )}
+      >
         <NftImage
           image={nft.image}
           priority={priority}
           sizes="(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw"
-          className="rounded-[15px]"
+          className="rounded-2xl lg:rounded-[15px]"
         />
         {nft.badge ? (
           <span className="absolute top-0 left-0 bg-primary px-3 py-1 text-sm font-medium text-primary-foreground lg:top-4">
@@ -55,12 +74,12 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
             Esgotado
           </span>
         ) : null}
-        {/* Mobile: só o favorito, no canto da imagem (Figma "Mobile / Início") */}
+        {/* Mobile: só o favorito, no canto superior direito da imagem (Figma "Mobile / Início") */}
         <FavoriteButton
           nft={nft}
           isFavorite={isFavorite}
           onToggle={() => favorite.toggle(nft.id, nft.name, isFavorite)}
-          className="absolute top-3 right-3 z-10 size-8 rounded-full lg:hidden"
+          className="absolute top-3 right-[11px] z-10 size-7 rounded-full border-border bg-secondary text-primary lg:hidden"
         />
         {/* Desktop: ações rápidas no hover ou quando algo do card recebe foco */}
         <div className="absolute inset-x-0 bottom-8 z-10 hidden justify-center gap-2 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 lg:flex">
@@ -93,8 +112,13 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
           </Link>
         </div>
       </div>
-      <div className="flex flex-col gap-1 px-2 lg:gap-3 lg:px-0">
-        <h3 className="text-[15px] leading-4 lg:text-base">
+      <div className={cn('flex flex-col pl-2 lg:pl-0', size === 'default' && 'lg:gap-3')}>
+        <Heading
+          className={cn(
+            'text-[15px] leading-5',
+            size === 'default' ? 'lg:text-base lg:leading-normal' : 'lg:leading-5',
+          )}
+        >
           <Link
             to="/nft/$nftId"
             params={{ nftId: nft.id }}
@@ -102,11 +126,11 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
           >
             {nft.name}
           </Link>
-        </h3>
+        </Heading>
         <EthPrice
           value={nft.price}
           compareAt={nft.compareAtPrice}
-          className="text-[17px] leading-4 lg:text-lg"
+          className={cn('text-base leading-4', size === 'default' && 'lg:text-lg')}
         />
       </div>
     </article>
@@ -134,6 +158,7 @@ function FavoriteButton({
     >
       <Heart
         className={cn('size-4', isFavorite && 'fill-primary text-primary')}
+        strokeWidth={2.25}
         aria-hidden="true"
       />
     </button>
@@ -142,11 +167,15 @@ function FavoriteButton({
 
 export function NftCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3" aria-hidden="true" data-testid="nft-card-skeleton">
-      <div className="rounded-2xl bg-card p-1 lg:rounded-none lg:px-1 lg:pt-6 lg:pb-[26px]">
-        <div className="shimmer aspect-square w-full rounded-[15px]" />
+    <div
+      className="flex flex-col gap-2 lg:gap-3"
+      aria-hidden="true"
+      data-testid="nft-card-skeleton"
+    >
+      <div className="rounded-[20px] bg-card px-1 pt-3 pb-5 lg:rounded-none lg:pt-6 lg:pb-[26px]">
+        <div className="shimmer aspect-square w-full rounded-2xl lg:rounded-[15px]" />
       </div>
-      <div className="flex flex-col gap-2 px-2 lg:gap-3 lg:px-0">
+      <div className="flex flex-col gap-2 pl-2 lg:gap-3 lg:pl-0">
         <div className="shimmer h-4 w-3/4 rounded-sm" />
         <div className="shimmer h-4 w-1/3 rounded-sm" />
       </div>
