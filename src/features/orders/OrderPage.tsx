@@ -11,6 +11,7 @@ import { ErrorState } from '@/components/feedback/States'
 import { Container } from '@/components/layout/Container'
 import { NftImage } from '@/components/nft/NftImage'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useStoredSession } from '@/features/auth/session-store'
 import { NETWORK_LABEL, PROVIDER_LABEL, shortAddress } from '@/features/checkout/labels'
 import { formatEth } from '@/lib/money'
@@ -75,12 +76,20 @@ function OrderView({ order }: { order: Order }) {
   const navigate = useNavigate()
   const close = () => void navigate({ to: order.status === 'declined' ? '/carrinho' : '/' })
 
+  // Figma "Confirmação de Pedido": modal sobre fundo escuro que cobre a página
+  // inteira. Dialog do Radix: foco preso, Esc fecha e o resto fica inerte.
   return (
-    <div className="flex min-h-[70dvh] items-start justify-center px-4 py-10 lg:py-[110px]">
-      <section
-        aria-labelledby="order-title"
-        aria-live="polite"
-        className="relative w-full max-w-[578px] bg-card"
+    <Dialog open onOpenChange={(open) => !open && close()}>
+      <DialogContent
+        overlayClassName="bg-background/95"
+        showCloseButton={false}
+        aria-describedby={undefined}
+        // Foco inicial no próprio diálogo (e não no botão de fechar), sem anel de foco ao abrir
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          ;(event.currentTarget as HTMLElement | null)?.focus()
+        }}
+        className="top-4 max-h-[calc(100dvh-2rem)] max-w-[578px] translate-y-0 gap-0 overflow-y-auto rounded-none border-0 bg-card p-0 sm:max-w-[578px] lg:top-[115px] lg:max-h-[calc(100dvh-130px)]"
         data-testid="order-status"
         data-status={order.status}
       >
@@ -93,7 +102,10 @@ function OrderView({ order }: { order: Order }) {
           <X className="size-5" aria-hidden="true" />
         </button>
 
-        <header className="flex flex-col items-center gap-4 px-6 pt-6 pb-5 text-center">
+        <header
+          className="flex flex-col items-center gap-4 px-6 pt-6 pb-5 text-center"
+          aria-live="polite"
+        >
           {order.status === 'confirmed' ? (
             <img src={thankYouIcon} alt="" width={80} height={80} />
           ) : order.status === 'declined' ? (
@@ -101,13 +113,15 @@ function OrderView({ order }: { order: Order }) {
           ) : (
             <Loader2 className="size-16 animate-spin text-primary" aria-hidden="true" />
           )}
-          <h1 id="order-title" className="text-base font-bold text-muted-foreground">
-            {order.status === 'confirmed'
-              ? 'Seus NFTs agora estão na sua carteira'
-              : order.status === 'declined'
-                ? 'Pagamento recusado'
-                : 'Aguardando confirmação na rede…'}
-          </h1>
+          <DialogTitle asChild>
+            <h1 className="text-base font-bold text-muted-foreground">
+              {order.status === 'confirmed'
+                ? 'Seus NFTs agora estão na sua carteira'
+                : order.status === 'declined'
+                  ? 'Pagamento recusado'
+                  : 'Aguardando confirmação na rede…'}
+            </h1>
+          </DialogTitle>
           {order.status === 'pending' ? (
             <p className="text-sm text-muted-foreground">
               Você pode recarregar ou fechar esta página: o pedido {order.number} continua sendo
@@ -116,7 +130,7 @@ function OrderView({ order }: { order: Order }) {
           ) : null}
         </header>
 
-        <dl className="grid grid-cols-2 gap-y-3 border-y border-primary px-6 py-3 text-sm sm:grid-cols-4 sm:divide-x sm:divide-primary [&>div]:px-3">
+        <dl className="grid grid-cols-2 gap-y-3 border-y border-primary px-6 py-3 text-[13px] whitespace-nowrap sm:flex sm:justify-between sm:divide-x sm:divide-primary sm:px-9 [&>div]:px-4 [&>div:first-child]:pl-0 [&>div:last-child]:pr-0">
           <div>
             <dt className="font-bold">{order.transaction ? 'ID da transação' : 'Pedido'}</dt>
             <dd className="text-muted-foreground" data-testid="order-reference">
@@ -167,9 +181,7 @@ function OrderView({ order }: { order: Order }) {
                       />
                       <div>
                         <p className="text-base font-bold">{line.name}</p>
-                        <p className="text-muted-foreground">
-                          ID do token: {line.tokenNumber} · {line.editionLabel}
-                        </p>
+                        <p className="text-brand-secondary">ID do token: {line.tokenNumber}</p>
                       </div>
                     </div>
                   </td>
@@ -242,7 +254,7 @@ function OrderView({ order }: { order: Order }) {
           ) : null}
         </div>
         <div className="h-2.5 bg-primary" aria-hidden="true" />
-      </section>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

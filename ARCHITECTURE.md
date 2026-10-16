@@ -252,7 +252,7 @@ Valores trafegam como **string decimal** (`"1.19"`), validados no contrato. Todo
 
 | Peça                                                                   | Arquivo                                         |
 | ---------------------------------------------------------------------- | ----------------------------------------------- |
-| Banco em memória + persistência no `localStorage` (`kurio:mock-db:v2`) | `mocks/db.ts`                                   |
+| Banco em memória + persistência no `localStorage` (`kurio:mock-db:v3`) | `mocks/db.ts`                                   |
 | Seed determinístico: PRNG com semente fixa e data de referência fixa   | `mocks/seed.ts`                                 |
 | Regras de negócio (sessões, catálogo, carrinho, cotação, pedidos)      | `mocks/domain/*`                                |
 | Handlers REST                                                          | `mocks/handlers/*`                              |

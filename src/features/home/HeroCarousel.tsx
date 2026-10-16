@@ -99,6 +99,16 @@ export function HeroCarousel() {
             ) : (
               <div className="shimmer aspect-square rounded-2xl" aria-hidden="true" />
             )}
+            {/* Miniatura do próximo destaque sobreposta (Figma "Mobile / Início") */}
+            {slides.length > 1 ? (
+              <div className="absolute -bottom-1 -left-4 w-[45%] overflow-hidden rounded-xl border-2 border-card">
+                <NftImage
+                  image={slides[(index + 1) % slides.length].image}
+                  alt=""
+                  sizes="80px"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       )}

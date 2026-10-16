@@ -27,17 +27,17 @@ export function PromoCards() {
       className="grid gap-7 [contain-intrinsic-size:auto_250px] [content-visibility:auto] md:grid-cols-2"
     >
       {promos.map((promo) => (
-        <article key={promo.title} className="flex overflow-hidden rounded-lg bg-card">
-          <div className="w-1/2 shrink-0 overflow-hidden rounded-[18px]">
+        <article key={promo.title} className="flex overflow-hidden rounded-lg bg-card md:h-[250px]">
+          <div className="w-1/2 shrink-0 overflow-hidden rounded-[18px] md:w-[292px]">
             <NftImage
               image={promo.image}
               sizes="(min-width: 768px) 290px, 50vw"
               className="h-full"
             />
           </div>
-          <div className="flex flex-1 flex-col items-end gap-3 p-4 text-right sm:p-7">
+          <div className="flex flex-1 flex-col items-end gap-2 py-4 pr-4 pl-2 text-right sm:py-9 sm:pr-7">
             <h2 className="text-base leading-6 font-bold sm:text-lg">{promo.title}</h2>
-            <p className="text-sm leading-6 text-muted-foreground">{promo.text}</p>
+            <p className="text-sm leading-4 text-muted-foreground">{promo.text}</p>
             <Link
               to="/"
               search={promo.search}

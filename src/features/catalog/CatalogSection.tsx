@@ -62,6 +62,8 @@ export function CatalogSection() {
 function CatalogToolbar() {
   const { search, update } = useCatalogSearch()
   const activeTab = search.tab ?? 'all'
+  // No mobile/tablet a ordenação fica na gaveta de filtros (o Figma mobile só tem as abas)
+  const isDesktop = useIsDesktop()
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div role="tablist" aria-label="Seções do catálogo" className="flex gap-5 overflow-x-auto">
@@ -87,32 +89,39 @@ function CatalogToolbar() {
           )
         })}
       </div>
-      <div className="flex items-center gap-2">
-        <span id="sort-label" className="text-[15px] whitespace-nowrap">
-          Ordenar por:
-        </span>
-        <Select
-          value={search.sort ?? 'recent'}
-          onValueChange={(value) =>
-            update({ sort: value === 'recent' ? undefined : (value as typeof search.sort) })
-          }
+      {isDesktop ? <SortSelect /> : null}
+    </div>
+  )
+}
+
+function SortSelect({ className }: { className?: string }) {
+  const { search, update } = useCatalogSearch()
+  return (
+    <div className={cn('flex items-center gap-2', className)}>
+      <span id="sort-label" className="text-[15px] whitespace-nowrap">
+        Ordenar por:
+      </span>
+      <Select
+        value={search.sort ?? 'recent'}
+        onValueChange={(value) =>
+          update({ sort: value === 'recent' ? undefined : (value as typeof search.sort) })
+        }
+      >
+        <SelectTrigger
+          aria-labelledby="sort-label"
+          className="h-auto border-0 bg-transparent px-1 py-0 text-[15px] shadow-none dark:bg-transparent"
+          data-testid="sort-select"
         >
-          <SelectTrigger
-            aria-labelledby="sort-label"
-            className="h-auto border-0 bg-transparent px-1 py-0 text-[15px] shadow-none dark:bg-transparent"
-            data-testid="sort-select"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent align="end">
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option} value={option}>
-                {SORT_LABELS[option]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end">
+          {SORT_OPTIONS.map((option) => (
+            <SelectItem key={option} value={option}>
+              {SORT_LABELS[option]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
@@ -236,7 +245,8 @@ function CatalogResults({ list }: { list: ReturnType<typeof useQuery<NftListResp
 function Grid({ children, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
-      className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:gap-x-8 lg:gap-y-[72px]"
+      // Mobile (2 colunas): coluna da direita deslocada, como o mosaico do Figma
+      className="grid grid-cols-2 gap-x-4 gap-y-8 max-sm:[&>*:nth-child(even)]:mt-8 sm:grid-cols-3 lg:gap-x-8 lg:gap-y-[72px]"
       {...props}
     >
       {children}
@@ -373,6 +383,7 @@ export function MobileSearchBar() {
             <SheetTitle>Filtros</SheetTitle>
             <SheetDescription>Os resultados são atualizados a cada alteração.</SheetDescription>
           </SheetHeader>
+          <SortSelect className="px-5 pt-2" />
           <CatalogFilters facets={facets} className="pb-10" />
         </SheetContent>
       </Sheet>

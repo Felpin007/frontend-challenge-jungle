@@ -11,10 +11,21 @@ export function RelatedNfts({
   nft?: NftDetail
   title?: string
 }) {
+  // Detalhe: outros NFTs da mesma categoria. Carrinho: destaques de arte digital
+  // (os mesmos do layout). Sem algoritmo de recomendação (ver ARCHITECTURE.md).
   const { data } = useQuery(
-    nftListQueryOptions({ page: 1, pageSize: 8, sort: 'popular', tab: 'all' }),
+    nftListQueryOptions({
+      page: 1,
+      pageSize: 9,
+      sort: 'recent',
+      tab: 'all',
+      categories: [nft?.category ?? 'arte-digital'],
+    }),
   )
-  const items = (data?.items ?? []).filter((item) => item.id !== nft?.id).slice(0, 5)
+  const items = (data?.items ?? [])
+    .filter((item) => item.id !== nft?.id)
+    .slice(nft ? 0 : 3)
+    .slice(0, 5)
   return (
     <section aria-labelledby="related-title" className="flex flex-col gap-8">
       <h2

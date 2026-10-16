@@ -11,6 +11,7 @@ import { NftImage } from '@/components/nft/NftImage'
 import { Button } from '@/components/ui/button'
 import { RelatedNfts } from '@/features/nft/RelatedNfts'
 import { formatEth } from '@/lib/money'
+import { useIsDesktop } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
 import { CouponForm, QuoteTotals } from './CartSummary'
 import {
@@ -26,6 +27,7 @@ export function hasBlockingIssues(cart: Cart) {
 }
 
 export function CartPage() {
+  const isDesktop = useIsDesktop()
   const cart = useCart()
   const quote = useQuote('ethereum', cart.data)
   const navigate = useNavigate()
@@ -67,7 +69,7 @@ export function CartPage() {
         <div className="flex flex-1 flex-col gap-3">
           <PriceChangeNotice cart={data} />
           <div
-            className="hidden grid-cols-[minmax(0,1fr)_116px_136px_124px_40px] border-b border-border pb-3 font-bold lg:grid"
+            className="hidden grid-cols-[311px_139px_136px_minmax(0,1fr)_40px] border-b border-border pb-3 font-bold lg:grid"
             aria-hidden="true"
           >
             <span>NFTs</span>
@@ -91,7 +93,7 @@ export function CartPage() {
           >
             Resumo da carteira
           </h2>
-          <CouponForm cart={data} />
+          <CouponForm cart={data} variant={isDesktop ? 'desktop' : 'mobile'} />
           <QuoteTotals quote={quote.data} loading={quote.isPending} updating={quoteUpdating} />
           {quote.isError ? (
             <ErrorState
@@ -128,7 +130,7 @@ export function CartPage() {
 
   return (
     <div>
-      <MobilePageHeader title="Carrinho de NFTs" />
+      <MobilePageHeader title="Carrinho de NFTs" centerTitle />
       <Container className="flex flex-col gap-16 lg:pt-8">
         <div className="flex flex-col gap-3">
           <nav aria-label="Trilha de navegação" className="hidden text-[15px] font-bold lg:block">
@@ -224,7 +226,7 @@ function CartRow({ item }: { item: CartItem }) {
   return (
     <li
       className={cn(
-        'relative flex gap-3 overflow-hidden rounded-2xl bg-card transition-opacity lg:grid lg:grid-cols-[minmax(0,1fr)_116px_136px_124px_40px] lg:items-center lg:gap-0 lg:rounded-none lg:p-0',
+        'relative flex gap-3 overflow-hidden rounded-2xl bg-card transition-opacity lg:grid lg:grid-cols-[311px_139px_136px_minmax(0,1fr)_40px] lg:items-center lg:gap-0 lg:rounded-none lg:p-0',
         busy && 'opacity-70',
       )}
       data-testid="cart-item"
@@ -241,12 +243,16 @@ function CartRow({ item }: { item: CartItem }) {
           />
         </div>
         <div className="flex flex-col gap-1 py-3 lg:py-0">
-          <p className="font-bold">{item.name}</p>
-          <p className="text-sm text-muted-foreground">
-            <span className="lg:hidden">Edição: {item.editionLabel}</span>
-            <span className="hidden whitespace-nowrap lg:inline">
-              ID do token: {item.tokenNumber} · Ed. {item.editionLabel}
+          <p className="font-bold">
+            {item.name}
+            {/* Desktop: edição como selo ao lado do nome (o mesmo NFT pode estar em edições diferentes) */}
+            <span className="ml-2 hidden rounded-full border border-border px-1.5 py-px align-middle text-[11px] font-normal text-muted-foreground lg:inline">
+              {item.editionLabel}
             </span>
+          </p>
+          <p className="text-sm text-brand-secondary">
+            <span className="lg:hidden">Edição: {item.editionLabel}</span>
+            <span className="hidden lg:inline">ID do token: {item.tokenNumber}</span>
           </p>
           <p className="text-lg font-bold text-brand-accent lg:hidden">
             {formatEth(item.lineTotal)}
@@ -258,7 +264,7 @@ function CartRow({ item }: { item: CartItem }) {
           ) : null}
         </div>
       </div>
-      <p className="hidden text-base text-brand-accent lg:block" data-testid="cart-item-price">
+      <p className="hidden text-base font-bold text-muted-foreground lg:block" data-testid="cart-item-price">
         {formatEth(item.unitPrice)}
       </p>
       <div className="ml-auto flex flex-col items-end justify-center gap-2 pr-3 lg:ml-0 lg:items-start lg:pr-0">

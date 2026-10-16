@@ -9,12 +9,13 @@ import type { RouterContext } from '@/app/router'
 import { Deferred } from '@/components/common/Deferred'
 import { ConnectionBanner } from '@/components/feedback/ConnectionBanner'
 import { NotFoundPage } from '@/components/feedback/NotFoundPage'
-import { MobileTabBar } from '@/components/layout/MobileTabBar'
+import { MobileTabBar, showsTabBar } from '@/components/layout/MobileTabBar'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { config } from '@/config'
+import { cn } from '@/lib/utils'
 import { AuthWatcher } from '@/features/auth/AuthWatcher'
 import { RealtimeProvider } from '@/realtime/RealtimeProvider'
 
@@ -27,9 +28,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 })
 
 /** Telas sem rodapé (fluxos focados, como no Figma). */
-const NO_FOOTER = ['/pagamento', '/pedidos', '/perfil']
+const NO_FOOTER = ['/perfil']
 /** No mobile essas telas são estilo app, sem rodapé (Figma). */
-const NO_FOOTER_MOBILE = ['/login', '/cadastro', '/carrinho', '/nft/']
+const NO_FOOTER_MOBILE = ['/login', '/cadastro', '/carrinho', '/nft/', '/pagamento', '/pedidos']
 
 function RootLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -48,7 +49,11 @@ function RootLayout() {
       <RealtimeProvider />
       <SiteHeader />
       <ConnectionBanner />
-      <main id="conteudo" tabIndex={-1} className="min-h-dvh pb-28 outline-none lg:pb-0">
+      <main
+        id="conteudo"
+        tabIndex={-1}
+        className={cn('min-h-dvh outline-none', showsTabBar(pathname) && 'pb-28 lg:pb-0')}
+      >
         <Outlet />
       </main>
       {showFooter ? (

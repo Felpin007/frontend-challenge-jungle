@@ -61,6 +61,7 @@ export function LoginForm({ search }: { search: AuthSearch }) {
         {(props) => (
           <Input
             {...props}
+            className="max-lg:h-[50px] max-lg:rounded-[10px]"
             type="email"
             autoComplete="email"
             placeholder="contato@email.com"
@@ -72,6 +73,7 @@ export function LoginForm({ search }: { search: AuthSearch }) {
         {(props) => (
           <PasswordInput
             {...props}
+            className="max-lg:h-[50px] max-lg:rounded-[10px]"
             autoComplete="current-password"
             placeholder="Senha"
             {...form.register('password')}
@@ -86,7 +88,7 @@ export function LoginForm({ search }: { search: AuthSearch }) {
           Esqueceu a senha?
         </ComingSoon>
       </div>
-      <Button type="submit" className="mt-2 h-11 text-base font-bold" disabled={login.isPending}>
+      <Button type="submit" className="mt-2 h-11 text-base font-bold max-lg:h-[60px] max-lg:rounded-[10px]" disabled={login.isPending}>
         {login.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
         Entrar
       </Button>
@@ -136,6 +138,7 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
         {(props) => (
           <Input
             {...props}
+            className="max-lg:h-[50px] max-lg:rounded-[10px]"
             autoComplete="username"
             placeholder="Nome de usuário"
             {...form.register('username')}
@@ -146,6 +149,7 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
         {(props) => (
           <Input
             {...props}
+            className="max-lg:h-[50px] max-lg:rounded-[10px]"
             type="email"
             autoComplete="email"
             placeholder="Digite seu e-mail"
@@ -157,6 +161,7 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
         {(props) => (
           <PasswordInput
             {...props}
+            className="max-lg:h-[50px] max-lg:rounded-[10px]"
             autoComplete="new-password"
             placeholder="Senha"
             {...form.register('password')}
@@ -167,6 +172,7 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
         {(props) => (
           <PasswordInput
             {...props}
+            className="max-lg:h-[50px] max-lg:rounded-[10px]"
             autoComplete="new-password"
             placeholder="Confirmar senha"
             {...form.register('confirmPassword')}
@@ -176,7 +182,7 @@ export function RegisterForm({ search, submitLabel }: { search: AuthSearch; subm
       <p className="text-xs text-muted-foreground">
         Senha: mínimo de 8 caracteres, com letra e número.
       </p>
-      <Button type="submit" className="mt-2 h-11 text-base font-bold" disabled={register.isPending}>
+      <Button type="submit" className="mt-2 h-11 text-base font-bold max-lg:h-[60px] max-lg:rounded-[10px]" disabled={register.isPending}>
         {register.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
         {submitLabel}
       </Button>

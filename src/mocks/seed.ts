@@ -208,11 +208,19 @@ function buildNfts(): NftDetail[] {
     })
   }
 
+  // Extremos da faixa de preço do layout ("Preço: 0,02 - 12,30 ETH")
+  const PRICE_EXTREMES: Record<number, string> = { 30: '0.02', 41: '12.3' }
+  for (const [index, price] of Object.entries(PRICE_EXTREMES)) {
+    list[Number(index)] = { ...list[Number(index)], price, compareAt: undefined }
+  }
+
   return list.map((entry, index) => {
     const id = `nft-${String(index + 1).padStart(3, '0')}`
     const tokenNumber = `#${String(entry.number).padStart(3, '0')}`
     const fullName = `${entry.name} ${tokenNumber}`
-    const pattern = index === 0 ? 0 : Math.floor(rand() * 4)
+    const randomPattern = index === 0 ? 0 : Math.floor(rand() * 4)
+    // Extremos de preço com edição aberta (sempre disponível): o preço exibido é o base
+    const pattern = index in PRICE_EXTREMES ? 3 : randomPattern
     const editions = buildEditions(id, entry.price, pattern, rand)
     if (index === 0) {
       // Emerald Ape: igual ao Figma (1/50 selecionada a 1,19 ETH, 1/1 esgotada)
@@ -271,7 +279,10 @@ function buildNfts(): NftDetail[] {
       tokenId: `#${String(entry.number).padStart(4, '0')}`,
       contract: `0x7A42…${(0x19e8 + index).toString(16).toUpperCase()}`,
       royaltiesPercent: 5,
-      rating: { average: Math.round((4 + rand()) * 10) / 10, count: 3 + Math.floor(rand() * 40) },
+      rating: (() => {
+        const random = { average: Math.round((4 + rand()) * 10) / 10, count: 3 + Math.floor(rand() * 40) }
+        return index === 0 ? { average: 4.8, count: 19 } : random // Emerald Ape: como no Figma
+      })(),
       creator: index % 2 === 0 ? 'Nova Sato' : 'Íris Moura',
     } satisfies NftDetail
   })

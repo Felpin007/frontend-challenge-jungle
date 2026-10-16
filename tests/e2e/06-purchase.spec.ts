@@ -23,7 +23,7 @@ test('compra completa: catálogo → detalhe → carrinho → pagamento → reci
   await page.getByTestId('checkout-button').click()
   await page.waitForURL('**/pagamento')
   await page.getByTestId('connect-wallet').click()
-  await expect(page.getByText('Carteira conectada')).toBeVisible()
+  await expect(page.getByTestId('wallet-connection').getByText('Carteira conectada')).toBeVisible()
   await page.getByTestId('confirm-purchase').click()
 
   // Revisão → envio

@@ -44,11 +44,11 @@ export function Field({
     <div className={cn('flex flex-col gap-2', className)}>
       <Label
         htmlFor={id}
-        className={cn('text-base font-normal', srOnlyLabel && 'sr-only', labelClassName)}
+        className={cn('gap-0 text-[15px] font-normal', srOnlyLabel && 'sr-only', labelClassName)}
       >
         {label}
         {required ? (
-          <span className="text-brand-coral" aria-hidden="true">
+          <span className="-mt-1 text-[22px] leading-none text-brand-coral" aria-hidden="true">
             *
           </span>
         ) : null}

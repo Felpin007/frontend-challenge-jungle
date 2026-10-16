@@ -9,11 +9,14 @@ export function MobilePageHeader({
   action,
   className,
   titleAs: Title = 'h1',
+  centerTitle = false,
 }: {
   title?: string
   action?: ReactNode
   className?: string
   titleAs?: 'h1' | 'p'
+  /** Título centralizado (Figma "Mobile / Carrinho de NFTs"). */
+  centerTitle?: boolean
 }) {
   const router = useRouter()
   const canGoBack = useCanGoBack()
@@ -28,7 +31,9 @@ export function MobilePageHeader({
         <ChevronLeft className="size-5" aria-hidden="true" />
       </button>
       {title ? (
-        <Title className="flex-1 text-xl font-bold">{title}</Title>
+        <Title className={cn('flex-1 text-xl font-bold', centerTitle && 'pr-9 text-center')}>
+          {title}
+        </Title>
       ) : (
         <span className="flex-1" />
       )}

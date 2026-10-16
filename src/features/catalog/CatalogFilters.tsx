@@ -124,10 +124,13 @@ function FacetSkeleton({ rows }: { rows: number }) {
   )
 }
 
+const formatRange = (value: number) =>
+  value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
 function PriceFilter({ range }: { range?: Facets['priceRange'] }) {
   const { search, update } = useCatalogSearch()
   const min = range ? Number(range.min) : 0
-  const max = range ? Math.ceil(Number(range.max)) : 13
+  const max = range ? Number(range.max) : 13
   const [values, setValues] = useState({ min: search.minPrice ?? '', max: search.maxPrice ?? '' })
   const [error, setError] = useState<string | null>(null)
   const errorId = useId()
@@ -170,6 +173,9 @@ function PriceFilter({ range }: { range?: Facets['priceRange'] }) {
         aria-label="Faixa de preço em ETH"
         thumbLabels={['Preço mínimo', 'Preço máximo']}
       />
+      <p className="px-3 text-[15px]" aria-hidden="true">
+        Preço: {formatRange(sliderValue[0])} - {formatRange(sliderValue[1])} ETH
+      </p>
       <div className="grid grid-cols-2 gap-2 px-3">
         <div className="flex flex-col gap-1">
           <Label htmlFor="price-min" className="text-xs text-muted-foreground">
@@ -179,7 +185,7 @@ function PriceFilter({ range }: { range?: Facets['priceRange'] }) {
             id="price-min"
             inputMode="decimal"
             value={values.min}
-            placeholder={range?.min ?? '0'}
+            placeholder={range ? Number(range.min).toFixed(2) : '0.00'}
             onChange={(e) => setValues((v) => ({ ...v, min: e.target.value }))}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? errorId : undefined}
@@ -193,7 +199,7 @@ function PriceFilter({ range }: { range?: Facets['priceRange'] }) {
             id="price-max"
             inputMode="decimal"
             value={values.max}
-            placeholder={range?.max ?? ''}
+            placeholder={range ? Number(range.max).toFixed(2) : ''}
             onChange={(e) => setValues((v) => ({ ...v, max: e.target.value }))}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? errorId : undefined}

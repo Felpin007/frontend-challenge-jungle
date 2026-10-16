@@ -81,8 +81,8 @@ export function CouponForm({
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            'h-10 min-w-0 flex-1 bg-transparent px-2 text-sm placeholder:text-brand-secondary',
-            variant === 'desktop' ? 'rounded-l-[3px] border border-r-0 border-primary' : 'px-4',
+            'h-10 min-w-0 flex-1 bg-transparent px-2 placeholder:text-brand-secondary',
+            variant === 'desktop' ? 'rounded-l-[3px] border border-r-0 border-primary text-xs' : 'px-4 text-sm',
           )}
           data-testid="coupon-input"
         />
@@ -91,7 +91,9 @@ export function CouponForm({
           disabled={apply.isPending}
           className={cn(
             'h-10 px-5 text-base font-bold',
-            variant === 'desktop' ? 'rounded-l-none rounded-r-[3px]' : 'rounded-full',
+            variant === 'desktop'
+              ? 'rounded-l-none rounded-r-[3px]'
+              : 'h-11 rounded-full bg-linear-to-r from-primary to-[#b8743d]',
           )}
         >
           {apply.isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}

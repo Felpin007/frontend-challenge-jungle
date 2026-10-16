@@ -129,17 +129,13 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
                 Mercado
               </Link>
             </li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" className="text-brand-accent">
-              {nft.name}
-            </li>
           </ol>
         </nav>
 
-        <div className="flex flex-col gap-6 lg:-mt-12 lg:flex-row lg:gap-8">
+        <div className="flex flex-col lg:-mt-[52px] lg:flex-row lg:gap-8">
           {/* Galeria */}
           <div className="flex flex-col-reverse gap-4 lg:flex-row lg:gap-7">
-            <ul className="flex gap-3 lg:flex-col lg:gap-4" aria-label="Galeria">
+            <ul className="hidden gap-3 lg:flex lg:flex-col lg:gap-4" aria-label="Galeria">
               {nft.gallery.map((image, index) => (
                 <li key={index}>
                   <button
@@ -159,12 +155,12 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
                 </li>
               ))}
             </ul>
-            <div className="relative bg-card p-0 lg:size-[444px] lg:p-5">
+            <div className="relative lg:size-[444px] lg:bg-card lg:p-5">
               <NftImage
                 image={nft.gallery[activeImage] ?? nft.image}
                 sizes="(min-width: 1024px) 404px, 100vw"
                 priority
-                className="rounded-[24px]"
+                className="rounded-[24px] max-lg:aspect-[362/330]"
               />
               <button
                 type="button"
@@ -174,13 +170,40 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
               >
                 <ZoomIn className="size-5" aria-hidden="true" />
               </button>
+              {/* Mobile: galeria por pontos sobre a imagem (o Figma mobile não tem miniaturas) */}
+              <div
+                className="absolute inset-x-0 bottom-12 flex justify-center gap-1 lg:hidden"
+                aria-label="Galeria"
+                role="group"
+              >
+                {nft.gallery.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setActiveImage(index)}
+                    aria-label={`Mostrar imagem ${index + 1} de ${nft.gallery.length}`}
+                    aria-current={activeImage === index ? 'true' : undefined}
+                    className="grid size-6 place-items-center"
+                  >
+                    <span
+                      className={cn(
+                        'block size-2 rounded-full bg-foreground transition',
+                        activeImage === index ? 'scale-125' : 'opacity-50',
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Informações e compra */}
-          <div className="flex flex-1 flex-col gap-4 rounded-t-[32px] bg-card p-6 lg:rounded-none lg:bg-transparent lg:p-0">
+          <div className="relative z-10 -mt-8 flex flex-1 flex-col gap-4 rounded-t-[32px] bg-card p-6 lg:mt-0 lg:rounded-none lg:bg-transparent lg:p-0">
             <div className="flex items-start justify-between gap-4">
-              <h1 id="nft-title" className="text-[28px] leading-9 font-bold">
+              <h1
+                id="nft-title"
+                className="text-xl leading-7 font-bold lg:text-[28px] lg:leading-9"
+              >
                 {nft.name}
               </h1>
               <p className="flex shrink-0 items-center gap-1 rounded-full border border-primary px-2 py-0.5 text-sm lg:hidden">
@@ -216,9 +239,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
 
             <div className="flex flex-col gap-2">
               <h2 className="hidden font-bold lg:block">Sobre este NFT:</h2>
-              <p className="text-[15px] leading-6 text-muted-foreground lg:text-primary">
-                {nft.description}
-              </p>
+              <p className="text-sm leading-6 text-muted-foreground">{nft.description}</p>
             </div>
 
             <EditionPicker
@@ -276,7 +297,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
               {limitMessage}
             </p>
 
-            <dl className="flex flex-col gap-3 text-[15px] text-muted-foreground lg:text-primary">
+            <dl className="flex flex-col gap-3 text-[15px] text-brand-secondary">
               <div className="flex gap-1">
                 <dt>ID do token:</dt>
                 <dd>{nft.tokenId}</dd>
@@ -299,7 +320,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
       </Container>
 
       {/* Barra fixa de compra (mobile) */}
-      <div className="fixed inset-x-0 bottom-[72px] z-30 flex flex-col gap-3 rounded-t-[28px] bg-card px-5 pt-4 pb-4 shadow-[0_-8px_24px_rgb(0_0_0/0.35)] lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-3 rounded-t-[28px] bg-card px-5 pt-4 pb-4 shadow-[0_-8px_24px_rgb(0_0_0/0.35)] lg:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-sm">Qtd.</span>
@@ -333,7 +354,7 @@ function NftDetailView({ nft }: { nft: NftDetail }) {
           </button>
         </div>
       </div>
-      <div className="h-36 lg:hidden" aria-hidden="true" />
+      <div className="h-44 lg:hidden" aria-hidden="true" />
 
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-[min(90vw,900px)] border-0 bg-card p-4 sm:max-w-[min(90vw,900px)]">
@@ -438,7 +459,7 @@ function DetailTabs({ nft }: { nft: NftDetail }) {
   const [tab, setTab] = useState<'details' | 'reviews'>('details')
   const tabClass = (active: boolean) =>
     cn(
-      'border-b-[3px] pb-1 text-lg',
+      'border-b-[3px] pb-1 text-[17px]',
       active
         ? 'border-primary font-bold text-brand-accent'
         : 'border-transparent hover:text-brand-accent',
@@ -478,7 +499,7 @@ function DetailTabs({ nft }: { nft: NftDetail }) {
           role="tabpanel"
           id="panel-details"
           aria-labelledby="tab-details"
-          className="flex flex-col gap-4 text-[15px] leading-6 text-primary"
+          className="flex flex-col gap-4 text-sm leading-6 text-muted-foreground"
         >
           {nft.longDescription.map((paragraph) => (
             <p key={paragraph.slice(0, 20)}>{paragraph}</p>

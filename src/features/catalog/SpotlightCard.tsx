@@ -30,7 +30,7 @@ export function SpotlightCard() {
             sizes="310px"
             className="transition group-hover:scale-[1.02]"
           />
-          <span className="absolute inset-x-3 bottom-3 rounded-md bg-background/85 px-3 py-2 text-sm">
+          <span className="sr-only">
             {nft.name} · <span className="font-bold text-brand-accent">{formatEth(nft.price)}</span>
           </span>
         </Link>

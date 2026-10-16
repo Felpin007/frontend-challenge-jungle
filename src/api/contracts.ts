@@ -335,15 +335,23 @@ export const ETH_ADDRESS = /^0x[a-fA-F0-9]{40}$/
 export const ENS_LABEL = /^[a-z0-9-]{3,32}$/
 
 export const WalletInput = z.object({
-  displayName: z.string().trim().min(2, 'Informe o nome de exibição').max(40),
-  nickname: z.string().trim().min(2, 'Informe um apelido').max(24),
+  displayName: z
+    .string()
+    .trim()
+    .min(2, 'Informe o nome de exibição')
+    .max(40, 'Máximo de 40 caracteres'),
+  nickname: z.string().trim().min(2, 'Informe um apelido').max(24, 'Máximo de 24 caracteres'),
   network: Network,
-  profileName: z.string().trim().min(2, 'Informe o nome do perfil').max(40),
+  profileName: z
+    .string()
+    .trim()
+    .min(2, 'Informe o nome do perfil')
+    .max(40, 'Máximo de 40 caracteres'),
   address: z
     .string()
     .trim()
     .regex(ETH_ADDRESS, 'Endereço deve ter 0x seguido de 40 caracteres hexadecimais'),
-  secondaryAddress: z.string().trim().max(64).nullable(),
+  secondaryAddress: z.string().trim().max(64, 'Máximo de 64 caracteres').nullable(),
   provider: WalletProvider,
   referralCode: z
     .string()
@@ -391,9 +399,20 @@ export type ConnectWalletRequest = z.infer<typeof ConnectWalletRequest>
 // ---------------------------------------------------------------------------
 
 export const CollectorInfo = z.object({
-  displayName: z.string().trim().min(2, 'Informe o nome de exibição').max(40),
-  username: z.string().trim().regex(USERNAME_PATTERN, 'Nome de usuário inválido'),
-  profileName: z.string().trim().min(2, 'Informe o nome do perfil').max(40),
+  displayName: z
+    .string()
+    .trim()
+    .min(2, 'Informe o nome de exibição')
+    .max(40, 'Máximo de 40 caracteres'),
+  username: z
+    .string()
+    .trim()
+    .regex(USERNAME_PATTERN, 'Use 3 a 24 caracteres: letras minúsculas, números, ponto ou _'),
+  profileName: z
+    .string()
+    .trim()
+    .min(2, 'Informe o nome do perfil')
+    .max(40, 'Máximo de 40 caracteres'),
   email: z.email('Informe um e-mail válido').trim().toLowerCase(),
   referralCode: z
     .string()
@@ -449,14 +468,22 @@ export const OrdersResponse = z.object({ items: z.array(Order) })
 // ---------------------------------------------------------------------------
 
 export const ProfileUpdateRequest = z.object({
-  displayName: z.string().trim().min(2, 'Informe o nome de exibição').max(40),
+  displayName: z
+    .string()
+    .trim()
+    .min(2, 'Informe o nome de exibição')
+    .max(40, 'Máximo de 40 caracteres'),
   username: z
     .string()
     .trim()
     .regex(USERNAME_PATTERN, 'Use 3 a 24 caracteres: letras minúsculas, números, ponto ou _'),
   email: z.email('Informe um e-mail válido').trim().toLowerCase(),
   ensName: z.string().trim().regex(ENS_LABEL, 'Nome ENS: 3 a 32 letras minúsculas, números ou -'),
-  walletNickname: z.string().trim().min(2, 'Informe o apelido da carteira').max(24),
+  walletNickname: z
+    .string()
+    .trim()
+    .min(2, 'Informe o apelido da carteira')
+    .max(24, 'Máximo de 24 caracteres'),
 })
 export type ProfileUpdateRequest = z.infer<typeof ProfileUpdateRequest>
 

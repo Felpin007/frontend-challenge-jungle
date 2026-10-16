@@ -34,14 +34,15 @@ export function AuthLayout({
 
   if (!isDesktop) {
     return (
-      <div className="mx-auto flex max-w-md flex-col gap-10 px-6 pt-16 pb-10">
+      <div className="mx-auto flex max-w-md flex-col gap-24 px-7 pt-32 pb-10">
         <p className="text-center text-[32px] font-bold tracking-widest" aria-hidden="true">
           KURIO
         </p>
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2 text-center">
+          <div className="mb-4 flex flex-col gap-2 text-center">
             <h1 className="text-xl font-bold">{title}</h1>
-            <p className="text-sm text-muted-foreground">{description}</p>
+            {/* O Figma mobile não tem texto de apoio: fica só para leitores de tela */}
+            <p className="sr-only">{description}</p>
           </div>
           {children}
           <SocialButtons />
@@ -84,7 +85,10 @@ export function AuthLayout({
           if (!open) void navigate({ href: search.redirect ?? '/', replace: true })
         }}
       >
-        <DialogContent className="max-w-[500px] gap-0 overflow-hidden rounded-none border-0 bg-card p-0 pt-10 pb-0 sm:max-w-[500px] [&>button]:text-primary">
+        <DialogContent
+          overlayClassName="bg-transparent"
+          className="top-[160px] max-w-[500px] translate-y-0 gap-0 overflow-hidden rounded-none border-0 bg-card p-0 pt-10 pb-0 sm:max-w-[500px] [&>button]:text-primary"
+        >
           <div className="flex flex-col gap-6 px-20 pb-10">
             <div
               className="flex items-center justify-center gap-2 text-xl"
@@ -113,7 +117,7 @@ export function AuthLayout({
               </Link>
             </div>
             <DialogTitle className="sr-only">{title}</DialogTitle>
-            <DialogDescription className="text-center text-sm text-foreground">
+            <DialogDescription className="text-center text-[13px] text-foreground">
               {description}
             </DialogDescription>
             {children}

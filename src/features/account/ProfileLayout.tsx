@@ -91,7 +91,7 @@ function NavItem({
         to={to}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex h-11 items-center gap-3 border-l-[6px] px-4 whitespace-nowrap text-brand-accent [&_svg]:size-5',
+          'flex h-11 items-center gap-3 border-l-[6px] px-4 text-[15px] whitespace-nowrap text-brand-accent [&_svg]:size-5',
           active ? 'border-primary bg-accent/40' : 'border-transparent hover:bg-accent',
         )}
       >
@@ -105,7 +105,7 @@ function NavItem({
 function SoonItem({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
     <li className="hidden shrink-0 lg:block">
-      <ComingSoon className="flex h-11 w-full items-center gap-3 px-[22px] text-brand-accent [&_svg]:size-5">
+      <ComingSoon className="flex h-11 w-full items-center gap-3 px-[22px] text-[15px] text-brand-accent [&_svg]:size-5">
         <span aria-hidden="true">{icon}</span>
         {children}
       </ComingSoon>

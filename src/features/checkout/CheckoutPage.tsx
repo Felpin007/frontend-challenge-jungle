@@ -27,6 +27,7 @@ import { MobilePageHeader } from '@/components/layout/MobilePageHeader'
 import { NftImage } from '@/components/nft/NftImage'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -307,8 +308,8 @@ function CheckoutForm({
             </li>
             <li aria-hidden="true">/</li>
             <li>
-              <Link to="/carrinho" className="hover:text-brand-accent">
-                Carrinho
+              <Link to="/" hash="catalogo" className="hover:text-brand-accent">
+                Mercado
               </Link>
             </li>
             <li aria-hidden="true">/</li>
@@ -328,12 +329,51 @@ function CheckoutForm({
           </p>
         ) : null}
 
-        <form
-          onSubmit={openReview}
-          noValidate
-          className="flex flex-col gap-10 lg:flex-row lg:gap-8"
-        >
-          <section aria-labelledby="collector-title" className="flex flex-1 flex-col gap-4">
+        <form onSubmit={openReview} noValidate className="flex flex-col gap-8 lg:flex-row lg:gap-8">
+          {/* Mobile (Figma "Mobile / Pagamento"): carteiras cadastradas primeiro */}
+          <section aria-labelledby="saved-wallets" className="flex flex-col gap-3 lg:hidden">
+            <div className="flex items-center justify-between">
+              <h2 id="saved-wallets" className="font-bold">
+                Carteira conectada
+              </h2>
+              <Link to="/perfil/carteiras" className="text-sm font-bold text-brand-accent">
+                Trocar carteira
+              </Link>
+            </div>
+            <RadioGroup
+              value={values.useSecondary && wallets.secondary ? 'secondary' : 'primary'}
+              onValueChange={(slot) => form.setValue('useSecondary', slot === 'secondary')}
+              aria-labelledby="saved-wallets"
+              className="gap-3"
+            >
+              {[wallets.secondary, primary]
+                .filter((wallet) => wallet !== null)
+                .map((wallet) => (
+                  <Label
+                    key={wallet.id}
+                    htmlFor={`wallet-${wallet.slot}`}
+                    className="flex cursor-pointer items-center gap-4 rounded-xl bg-card px-5 py-4 font-normal"
+                  >
+                    <RadioGroupItem id={`wallet-${wallet.slot}`} value={wallet.slot} />
+                    <span className="flex flex-col gap-1">
+                      <span className="font-bold">{wallet.nickname}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {wallet.secondaryAddress ?? shortAddress(wallet.address)}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        Rede {wallet.slot === 'primary' ? 'principal ' : ''}
+                        {NETWORK_LABEL[wallet.network]}
+                      </span>
+                    </span>
+                  </Label>
+                ))}
+            </RadioGroup>
+          </section>
+
+          <section
+            aria-labelledby="collector-title"
+            className="flex flex-1 flex-col gap-4 max-lg:order-3"
+          >
             <h2 id="collector-title" className="text-lg font-bold">
               Perfil do colecionador
             </h2>
@@ -372,6 +412,7 @@ function CheckoutForm({
               </Field>
               <Field
                 label="Endereço da carteira"
+                className="max-lg:hidden"
                 required
                 hint={`Carteira ${selectedWallet.slot === 'primary' ? 'principal' : 'secundária'}: ${selectedWallet.nickname}`}
               >
@@ -384,7 +425,7 @@ function CheckoutForm({
                   />
                 )}
               </Field>
-              <Field label="ENS ou carteira secundária (opcional)">
+              <Field label="ENS ou carteira secundária (opcional)" className="max-lg:hidden">
                 {(p) => (
                   <Input
                     {...p}
@@ -395,7 +436,12 @@ function CheckoutForm({
                   />
                 )}
               </Field>
-              <Field label="Tipo de carteira" required error={field('provider')}>
+              <Field
+                label="Tipo de carteira"
+                className="max-lg:hidden"
+                required
+                error={field('provider')}
+              >
                 {(p) => (
                   <Controller
                     control={form.control}
@@ -439,7 +485,7 @@ function CheckoutForm({
                 )}
               </Field>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 max-lg:hidden">
               <Controller
                 control={form.control}
                 name="useSecondary"
@@ -475,17 +521,18 @@ function CheckoutForm({
             </Field>
           </section>
 
-          <aside aria-labelledby="your-nfts" className="flex w-full flex-col gap-4 lg:w-[405px]">
-            <h2 id="your-nfts" className="text-lg font-bold">
+          {/* No mobile esta coluna "se desfaz" (display: contents) e cada bloco usa order */}
+          <div className="flex w-full flex-col gap-4 max-lg:contents lg:w-[405px]">
+            <h2 id="your-nfts" className="text-lg font-bold max-lg:hidden">
               Seus NFTs
             </h2>
-            <div className="flex justify-between font-bold" aria-hidden="true">
+            <div className="flex justify-between font-bold max-lg:hidden" aria-hidden="true">
               <span>NFTs</span>
               <span>Subtotal</span>
             </div>
-            <ul className="flex flex-col gap-3" aria-label="Itens do pedido">
+            <ul className="flex flex-col gap-3 max-lg:hidden" aria-label="Itens do pedido">
               {(quote.data?.lines ?? []).map((line) => (
-                <li key={line.itemId} className="flex items-center gap-3 bg-card p-1 pr-3">
+                <li key={line.itemId} className="flex items-center gap-2 bg-card p-1 pr-3">
                   <NftImage
                     image={line.image}
                     alt=""
@@ -493,26 +540,28 @@ function CheckoutForm({
                     className="size-[66px] rounded-md"
                   />
                   <div className="flex flex-1 flex-col">
-                    <span className="font-bold">{line.name}</span>
-                    <span className="text-sm text-muted-foreground">
-                      ID do token: {line.tokenNumber} · {line.editionLabel}
+                    <span className="font-bold whitespace-nowrap">{line.name}</span>
+                    <span className="text-sm text-brand-secondary">
+                      ID do token: {line.tokenNumber}
                     </span>
                   </div>
-                  <span className="text-sm">(x {line.quantity})</span>
+                  <span className="text-sm text-muted-foreground">(x {line.quantity})</span>
                   <span className="text-lg font-bold text-brand-accent">
                     {formatEth(line.lineTotal)}
                   </span>
                 </li>
               ))}
             </ul>
-            <CouponToggle />
-            <QuoteTotals
-              quote={quote.data}
-              loading={quote.isPending}
-              updating={quote.isFetching && quote.isPlaceholderData}
-            />
+            <div className="flex flex-col gap-4 max-lg:hidden">
+              <CouponToggle />
+              <QuoteTotals
+                quote={quote.data}
+                loading={quote.isPending}
+                updating={quote.isFetching && quote.isPlaceholderData}
+              />
+            </div>
             {blocking ? (
-              <p role="alert" className="text-sm text-amber">
+              <p role="alert" className="text-sm text-amber max-lg:order-4">
                 Há itens esgotados ou com estoque insuficiente.{' '}
                 <Link to="/carrinho" className="underline">
                   Ajuste o carrinho
@@ -521,13 +570,50 @@ function CheckoutForm({
               </p>
             ) : null}
 
-            <section aria-labelledby="wallet-network" className="flex flex-col gap-3">
-              <h3 id="wallet-network" className="text-center text-lg font-bold">
+            <section
+              aria-labelledby="wallet-network"
+              className="flex flex-col gap-3 max-lg:order-2"
+            >
+              <h3 id="wallet-network" className="font-bold lg:text-center lg:text-lg">
                 Carteira e rede
               </h3>
+              <RadioGroup
+                value={values.provider}
+                onValueChange={(provider) => form.setValue('provider', provider as WalletProvider)}
+                aria-labelledby="wallet-network"
+                className="gap-3"
+              >
+                {(['walletconnect', 'metamask', 'coinbase'] as const).map((provider) => (
+                  <Label
+                    key={provider}
+                    htmlFor={`provider-${provider}`}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-4 rounded-xl bg-card px-4 py-3 font-normal lg:rounded-none lg:border lg:bg-transparent',
+                      values.provider === provider ? 'lg:border-foreground' : 'lg:border-border',
+                    )}
+                  >
+                    <RadioGroupItem
+                      id={`provider-${provider}`}
+                      value={provider}
+                      className="max-lg:order-last max-lg:ml-auto"
+                    />
+                    <span
+                      className="grid size-10 place-items-center rounded-full border border-border text-sm font-bold text-brand-accent"
+                      aria-hidden="true"
+                    >
+                      {provider === 'coinbase' ? (
+                        <WalletIcon className="size-5" />
+                      ) : (
+                        PROVIDER_LABEL[provider][0]
+                      )}
+                    </span>
+                    {PROVIDER_LABEL[provider]}
+                  </Label>
+                ))}
+              </RadioGroup>
               <div
                 className={cn(
-                  'flex flex-col gap-3 border p-4',
+                  'flex flex-col gap-3 rounded-xl border p-4 lg:rounded-none',
                   matches ? 'border-success' : 'border-border',
                 )}
                 data-testid="wallet-connection"
@@ -577,18 +663,27 @@ function CheckoutForm({
               </div>
             </section>
 
-            <Button
-              type="submit"
-              className="h-14 rounded-full text-base font-bold max-lg:bg-linear-to-r max-lg:from-primary max-lg:to-[#b8743d] lg:h-[45px] lg:rounded-[3px]"
-              disabled={blocking || freshQuote.isPending || place.busy}
-              data-testid="confirm-purchase"
-            >
-              {freshQuote.isPending ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              ) : null}
-              Confirmar compra
-            </Button>
-          </aside>
+            {/* Mobile: total e confirmação fixos no rodapé da tela (Figma) */}
+            <div className="flex flex-col gap-3 max-lg:sticky max-lg:bottom-0 max-lg:z-20 max-lg:order-5 max-lg:-mx-4 max-lg:bg-background max-lg:px-4 max-lg:pt-3 max-lg:pb-5">
+              <p className="flex items-baseline justify-end gap-6 text-lg font-bold lg:hidden">
+                <span>Total:</span>
+                <span className="text-brand-accent" data-testid="mobile-total">
+                  {quote.data ? formatEth(quote.data.total) : '…'}
+                </span>
+              </p>
+              <Button
+                type="submit"
+                className="h-14 rounded-full text-base font-bold max-lg:bg-linear-to-r max-lg:from-primary max-lg:to-[#b8743d] lg:h-[45px] lg:rounded-[3px]"
+                disabled={blocking || freshQuote.isPending || place.busy}
+                data-testid="confirm-purchase"
+              >
+                {freshQuote.isPending ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                ) : null}
+                Confirmar compra
+              </Button>
+            </div>
+          </div>
         </form>
       </Container>
 

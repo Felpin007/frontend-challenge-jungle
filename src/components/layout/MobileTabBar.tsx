@@ -5,6 +5,11 @@ import { useCart } from '@/features/cart/queries'
 import { cn } from '@/lib/utils'
 import { SearchDialog } from './SiteHeader'
 
+/** Telas mobile com a barra inferior. No Figma, detalhe, carrinho, pagamento e login têm barra própria. */
+export function showsTabBar(pathname: string) {
+  return pathname === '/' || pathname.startsWith('/perfil')
+}
+
 /** Navegação inferior do layout mobile (Figma "Mobile / Início"). */
 export function MobileTabBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -12,6 +17,7 @@ export function MobileTabBar() {
   const session = useStoredSession()
   const { data: cart } = useCart()
   const count = cart?.itemCount ?? 0
+  if (!showsTabBar(pathname)) return null
 
   const item = (active: boolean) =>
     cn(
@@ -28,14 +34,14 @@ export function MobileTabBar() {
           aria-label="Início"
           aria-current={pathname === '/' ? 'page' : undefined}
         >
-          <House className="size-6" aria-hidden="true" />
+          <House className="size-6 fill-current" aria-hidden="true" />
         </Link>
         <Link
           to="/perfil/favoritos"
           className={item(pathname === '/perfil/favoritos')}
           aria-label="Favoritos"
         >
-          <Heart className="size-6" aria-hidden="true" />
+          <Heart className="size-6 fill-current" aria-hidden="true" />
         </Link>
         <SearchDialog>
           <button
@@ -67,7 +73,7 @@ export function MobileTabBar() {
             className={item(pathname.startsWith('/perfil') && pathname !== '/perfil/favoritos')}
             aria-label="Meu perfil"
           >
-            <User className="size-6" aria-hidden="true" />
+            <User className="size-6 fill-current" aria-hidden="true" />
           </Link>
         ) : (
           <Link
@@ -76,7 +82,7 @@ export function MobileTabBar() {
             className={item(pathname === '/login')}
             aria-label="Entrar"
           >
-            <User className="size-6" aria-hidden="true" />
+            <User className="size-6 fill-current" aria-hidden="true" />
           </Link>
         )}
       </div>

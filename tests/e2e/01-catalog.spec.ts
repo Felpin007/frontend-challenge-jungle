@@ -42,23 +42,27 @@ test.describe('catálogo', () => {
       ))
     await expect(summary(page)).toContainText(`${expected} NFT`)
 
-    // Ordenação
+    // Ordenação (no mobile ela fica na gaveta de filtros, como no Figma)
+    await openFilters(page)
     await page.getByTestId('sort-select').click()
     await page.getByRole('option', { name: 'Maior preço' }).click()
     await expect(page).toHaveURL(/sort=price-desc/)
+    await closeFilters(page)
 
     // Refresh mantém o estado
     await page.reload()
     await openFilters(page)
     await expect(page.getByRole('checkbox', { name: /Música/ })).toBeChecked()
     await expect(page.getByRole('checkbox', { name: /Polygon/ })).toBeChecked()
-    await closeFilters(page)
     await expect(page.getByTestId('sort-select')).toHaveText('Maior preço')
+    await closeFilters(page)
 
     // Histórico: voltar desfaz a ordenação, avançar refaz
     await page.goBack()
     await expect(page).not.toHaveURL(/sort=/)
+    await openFilters(page)
     await expect(page.getByTestId('sort-select')).toHaveText('Listados recentemente')
+    await closeFilters(page)
     await page.goForward()
     await expect(page).toHaveURL(/sort=price-desc/)
   })
