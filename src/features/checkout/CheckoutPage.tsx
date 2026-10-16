@@ -577,7 +577,7 @@ function CheckoutForm({
 
             <Button
               type="submit"
-              className="h-14 rounded-full bg-gradient-to-r from-primary to-[#b8743d] text-base font-bold lg:h-[45px] lg:rounded-[3px] lg:bg-none"
+              className="h-14 rounded-full text-base font-bold max-lg:bg-linear-to-r max-lg:from-primary max-lg:to-[#b8743d] lg:h-[45px] lg:rounded-[3px]"
               disabled={blocking || freshQuote.isPending || place.busy}
               data-testid="confirm-purchase"
             >

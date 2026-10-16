@@ -27,8 +27,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 /** Telas sem rodapé (fluxos focados, como no Figma). */
 const NO_FOOTER = ['/pagamento', '/pedidos', '/perfil']
-/** No mobile, login e cadastro são telas cheias, sem rodapé (Figma). */
-const NO_FOOTER_MOBILE = ['/login', '/cadastro']
+/** No mobile essas telas são estilo app, sem rodapé (Figma). */
+const NO_FOOTER_MOBILE = ['/login', '/cadastro', '/carrinho', '/nft/']
 
 function RootLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })

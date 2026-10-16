@@ -67,7 +67,7 @@ export function CartPage() {
         <div className="flex flex-1 flex-col gap-3">
           <PriceChangeNotice cart={data} />
           <div
-            className="hidden grid-cols-[1fr_140px_136px_140px_40px] border-b border-border pb-3 font-bold lg:grid"
+            className="hidden grid-cols-[minmax(0,1fr)_116px_136px_124px_40px] border-b border-border pb-3 font-bold lg:grid"
             aria-hidden="true"
           >
             <span>NFTs</span>
@@ -107,7 +107,7 @@ export function CartPage() {
             </p>
           ) : null}
           <Button
-            className="h-14 rounded-full bg-gradient-to-r from-primary to-[#b8743d] text-base font-bold lg:h-10 lg:rounded-[3px] lg:bg-none"
+            className="h-14 rounded-full text-base font-bold max-lg:bg-linear-to-r max-lg:from-primary max-lg:to-[#b8743d] lg:h-10 lg:rounded-[3px]"
             disabled={blocking || !quote.data || quoteUpdating}
             onClick={() => void navigate({ to: '/pagamento' })}
             data-testid="checkout-button"
@@ -224,7 +224,7 @@ function CartRow({ item }: { item: CartItem }) {
   return (
     <li
       className={cn(
-        'relative flex gap-3 overflow-hidden rounded-2xl bg-card transition-opacity lg:grid lg:grid-cols-[1fr_140px_136px_140px_40px] lg:items-center lg:rounded-none lg:p-0',
+        'relative flex gap-3 overflow-hidden rounded-2xl bg-card transition-opacity lg:grid lg:grid-cols-[minmax(0,1fr)_116px_136px_124px_40px] lg:items-center lg:gap-0 lg:rounded-none lg:p-0',
         busy && 'opacity-70',
       )}
       data-testid="cart-item"
@@ -244,8 +244,8 @@ function CartRow({ item }: { item: CartItem }) {
           <p className="font-bold">{item.name}</p>
           <p className="text-sm text-muted-foreground">
             <span className="lg:hidden">Edição: {item.editionLabel}</span>
-            <span className="hidden lg:inline">
-              ID do token: {item.tokenNumber} · {item.editionLabel}
+            <span className="hidden whitespace-nowrap lg:inline">
+              ID do token: {item.tokenNumber} · Ed. {item.editionLabel}
             </span>
           </p>
           <p className="text-lg font-bold text-brand-accent lg:hidden">
