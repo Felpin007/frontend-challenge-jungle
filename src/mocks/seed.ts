@@ -7,7 +7,13 @@ import type { Category, Edition, Network, NftDetail, Wallet } from '@/api/contra
 import { CATEGORIES, NETWORKS } from '@/api/contracts'
 import { fromWei, toWei } from '@/lib/money'
 import { hashPassword } from './crypto'
-import type { CartRecord, CouponRecord, DbState, UserRecord } from './db'
+import {
+  DB_SCHEMA_VERSION,
+  type CartRecord,
+  type CouponRecord,
+  type DbState,
+  type UserRecord,
+} from './db'
 
 /** Data de referência dos dados (não usamos "agora" para manter o seed estável). */
 export const SEED_REFERENCE_DATE = Date.UTC(2026, 9, 1, 12, 0, 0)
@@ -161,6 +167,17 @@ export function lowestAvailablePrice(editions: Edition[]): string {
   return pool.reduce((min, e) => (toWei(e.price) < toWei(min) ? e.price : min), pool[0].price)
 }
 
+/** Edição disponível mais barata; em empate, prefere a limitada (como no Figma: 1/50). */
+export function defaultEditionId(editions: Edition[]): string | null {
+  const available = editions.filter((e) => e.available > 0)
+  if (!available.length) return null
+  const rank = (e: Edition) => (e.kind === 'open' ? 1 : 0)
+  return available.reduce((best, e) => {
+    const diff = toWei(e.price) - toWei(best.price)
+    return diff < 0n || (diff === 0n && rank(e) < rank(best)) ? e : best
+  }).id
+}
+
 function buildNfts(): NftDetail[] {
   const rand = mulberry32(20261016)
   const list: Array<{
@@ -200,6 +217,9 @@ function buildNfts(): NftDetail[] {
     if (index === 0) {
       // Emerald Ape: igual ao Figma (1/50 selecionada a 1,19 ETH, 1/1 esgotada)
       editions[0].available = 0
+    } else if (index < FIGMA_NFTS.length && editions.every((e) => e.available === 0)) {
+      // NFTs que aparecem no layout começam com estoque
+      editions[editions.length - 1].available = editions[editions.length - 1].supply ?? 1
     }
     const category: Category =
       index < FIGMA_NFTS.length ? 'arte-digital' : CATEGORIES[index % CATEGORIES.length]
@@ -233,6 +253,7 @@ function buildNfts(): NftDetail[] {
       compareAtPrice: entry.compareAt ?? null,
       badge: entry.rare ? 'RARO' : null,
       totalAvailable: editions.reduce((sum, e) => sum + e.available, 0),
+      defaultEditionId: defaultEditionId(editions),
       listedAt,
       popularity: Math.round(rand() * 1000),
       version: 1,
@@ -350,7 +371,7 @@ export async function createSeed(): Promise<DbState> {
   }
 
   return {
-    schemaVersion: 1,
+    schemaVersion: DB_SCHEMA_VERSION,
     seq: 1000,
     eventSeq: 0,
     users,

@@ -154,6 +154,8 @@ export const NftSummary = z.object({
   compareAtPrice: EthAmount.nullable(),
   badge: z.enum(['RARO']).nullable(),
   totalAvailable: z.number().int().min(0),
+  /** Edição disponível mais barata (usada no "adicionar ao carrinho" rápido do card). */
+  defaultEditionId: z.string().nullable(),
   listedAt: IsoDate,
   popularity: z.number(),
   /** Versão do recurso, usada para descartar eventos antigos. */

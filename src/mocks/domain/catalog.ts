@@ -11,7 +11,13 @@ import {
 import { compareEth, toWei } from '@/lib/money'
 import { db, persist } from '../db'
 import { getScenario } from '../scenarios'
-import { CATEGORY_LABELS, lowestAvailablePrice, NETWORK_LABELS, SEED_REFERENCE_DATE } from '../seed'
+import {
+  CATEGORY_LABELS,
+  defaultEditionId,
+  lowestAvailablePrice,
+  NETWORK_LABELS,
+  SEED_REFERENCE_DATE,
+} from '../seed'
 import { publish } from './bus'
 
 export const DEFAULT_PAGE_SIZE = 9
@@ -150,6 +156,7 @@ export function updateEditions(
 export function recomputeNft(nft: NftDetail) {
   nft.price = lowestAvailablePrice(nft.editions)
   nft.totalAvailable = nft.editions.reduce((sum, e) => sum + e.available, 0)
+  nft.defaultEditionId = defaultEditionId(nft.editions)
   nft.version += 1
 }
 

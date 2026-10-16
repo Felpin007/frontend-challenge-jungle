@@ -68,7 +68,7 @@ export interface OrderRecord extends Order {
 }
 
 export interface DbState {
-  schemaVersion: 1
+  schemaVersion: typeof DB_SCHEMA_VERSION
   seq: number
   eventSeq: number
   users: UserRecord[]
@@ -84,7 +84,9 @@ export interface DbState {
   idempotency: Record<string, { userId: string; requestHash: string; orderId: string }>
 }
 
-export const DB_STORAGE_KEY = 'kurio:mock-db:v1'
+/** Incrementar quando o formato do banco mudar: dados antigos são descartados. */
+export const DB_SCHEMA_VERSION = 2
+export const DB_STORAGE_KEY = `kurio:mock-db:v${DB_SCHEMA_VERSION}`
 
 let state: DbState | null = null
 
@@ -98,7 +100,7 @@ export async function initDb(): Promise<DbState> {
     const saved = localStorage.getItem(DB_STORAGE_KEY)
     if (saved) {
       const parsed = JSON.parse(saved) as DbState
-      if (parsed.schemaVersion === 1) {
+      if (parsed.schemaVersion === DB_SCHEMA_VERSION) {
         state = parsed
         return state
       }
