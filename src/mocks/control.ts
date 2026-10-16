@@ -9,7 +9,13 @@ import { findEdition, updateEditions } from './domain/catalog'
 import { resolveIfDue } from './domain/orders'
 import { expireAllSessions } from './domain/sessions'
 import { clearInjected, delayNext, failNext } from './mock-http'
-import { connectionCount, dropConnections, replayLastEvent, sendStaleNftEvent } from './realtime'
+import {
+  connectedUsers,
+  connectionCount,
+  dropConnections,
+  replayLastEvent,
+  sendStaleNftEvent,
+} from './realtime'
 import { getScenario, PRESETS, setScenario } from './scenarios'
 
 export const mockControl = {
@@ -48,6 +54,7 @@ export const mockControl = {
   replayLastEvent,
   sendStaleNftEvent,
   connectionCount,
+  connectedUsers,
 
   /** Resolve agora todos os pedidos pendentes (confirmando ou recusando conforme o cenário). */
   resolvePendingOrders() {

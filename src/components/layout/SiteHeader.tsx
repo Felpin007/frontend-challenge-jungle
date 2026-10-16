@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { LogIn, LogOut, Search, ShoppingCart, User, Wallet, Heart } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { ComingSoon } from '@/components/common/ComingSoon'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -30,7 +31,6 @@ const MARKET_PATHS = ['/nft', '/carrinho', '/pagamento', '/pedidos']
 export function SiteHeader() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const href = useRouterState({ select: (s) => s.location.href })
-  const [searchOpen, setSearchOpen] = useState(false)
   const inMarket = MARKET_PATHS.some((p) => pathname.startsWith(p))
 
   return (
@@ -51,20 +51,16 @@ export function SiteHeader() {
             <ComingSoon className="text-base">Aprenda</ComingSoon>
           </nav>
           <div className="flex items-center gap-7 self-start">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              className="rounded-sm p-1"
-              aria-label="Buscar NFTs"
-            >
-              <Search className="size-5" aria-hidden="true" />
-            </button>
+            <SearchDialog>
+              <button type="button" className="rounded-sm p-1" aria-label="Buscar NFTs">
+                <Search className="size-5" aria-hidden="true" />
+              </button>
+            </SearchDialog>
             <CartLink />
             <AccountArea redirect={href} />
           </div>
         </div>
       </Container>
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   )
 }
@@ -174,24 +170,24 @@ function AccountArea({ redirect }: { redirect: string }) {
   )
 }
 
-export function SearchDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
+/**
+ * Busca global. Usa DialogTrigger para o Radix devolver o foco ao botão
+ * que abriu o diálogo quando ele fecha.
+ */
+export function SearchDialog({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
   const [term, setTerm] = useState('')
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    onOpenChange(false)
+    setOpen(false)
     void navigate({ to: '/', search: { q: term.trim() || undefined }, hash: 'catalogo' })
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Buscar no mercado</DialogTitle>
@@ -203,7 +199,6 @@ export function SearchDialog({
           </label>
           <Input
             id="global-search"
-            autoFocus
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             placeholder="Ex.: Emerald, Nomad, Kurio Apes"

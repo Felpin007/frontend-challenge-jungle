@@ -171,3 +171,8 @@ export function sendStaleNftEvent(nftId: string) {
 export function connectionCount() {
   return connections.size
 }
+
+/** Usuário de cada conexão aberta (null = visitante). Usado para verificar isolamento. */
+export function connectedUsers() {
+  return [...connections.values()].map((c) => c.userId)
+}

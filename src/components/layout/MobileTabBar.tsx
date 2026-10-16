@@ -1,6 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Heart, House, ScanSearch, ShoppingCart, User } from 'lucide-react'
-import { useState } from 'react'
 import { useStoredSession } from '@/features/auth/session-store'
 import { useCart } from '@/features/cart/queries'
 import { cn } from '@/lib/utils'
@@ -12,7 +11,6 @@ export function MobileTabBar() {
   const href = useRouterState({ select: (s) => s.location.href })
   const session = useStoredSession()
   const { data: cart } = useCart()
-  const [searchOpen, setSearchOpen] = useState(false)
   const count = cart?.itemCount ?? 0
 
   const item = (active: boolean) =>
@@ -39,14 +37,15 @@ export function MobileTabBar() {
         >
           <Heart className="size-6" aria-hidden="true" />
         </Link>
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
-          className="-mt-12 grid size-16 place-items-center rounded-full border-4 border-background bg-primary text-primary-foreground shadow-lg"
-          aria-label="Buscar NFTs"
-        >
-          <ScanSearch className="size-7" aria-hidden="true" />
-        </button>
+        <SearchDialog>
+          <button
+            type="button"
+            className="-mt-12 grid size-16 place-items-center rounded-full border-4 border-background bg-primary text-primary-foreground shadow-lg"
+            aria-label="Buscar NFTs"
+          >
+            <ScanSearch className="size-7" aria-hidden="true" />
+          </button>
+        </SearchDialog>
         <Link
           to="/carrinho"
           className={item(pathname === '/carrinho')}
@@ -81,7 +80,6 @@ export function MobileTabBar() {
           </Link>
         )}
       </div>
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </nav>
   )
 }

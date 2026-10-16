@@ -76,6 +76,10 @@ export class Mocks {
     await this.ready()
     await this.page.evaluate(() => window.__kurioMocks!.resolvePendingOrders())
   }
+  async connectedUsers() {
+    await this.ready()
+    return this.page.evaluate(() => window.__kurioMocks!.connectedUsers())
+  }
   async connectionCount() {
     await this.ready()
     return this.page.evaluate(() => window.__kurioMocks!.connectionCount())

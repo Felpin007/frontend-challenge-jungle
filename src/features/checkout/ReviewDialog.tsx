@@ -50,6 +50,14 @@ export function ReviewDialog({
       <DialogContent
         className="max-h-[90dvh] overflow-y-auto border-0 bg-card sm:max-w-[560px]"
         data-testid="review-dialog"
+        // Aberto por código (após validar o formulário): ao fechar, o foco volta ao botão de origem.
+        onCloseAutoFocus={(event) => {
+          const origin = document.querySelector<HTMLElement>('[data-testid="confirm-purchase"]')
+          if (origin) {
+            event.preventDefault()
+            origin.focus()
+          }
+        }}
       >
         <DialogHeader>
           <DialogTitle>Revise seu pedido</DialogTitle>

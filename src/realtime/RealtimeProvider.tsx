@@ -44,21 +44,18 @@ export function RealtimeProvider() {
 
     function registerHandlers(socket: Socket) {
       const guard = new EventGuard()
-      let hasConnected = false
 
       socket.on('connect', () => {
         realtimeStatus.set('connected')
-        if (hasConnected) {
-          // Reconexão: eventos podem ter sido perdidos. Reconcilia com o REST.
-          void queryClient.invalidateQueries({
-            queryKey: queryKeys.nfts.all,
-            refetchType: 'active',
-          })
-          void queryClient.invalidateQueries({ queryKey: queryKeys.cart.all })
-          if (userId)
-            void queryClient.invalidateQueries({ queryKey: queryKeys.user.orders(userId) })
+        // A cada conexão (inclusive a primeira) eventos podem ter sido perdidos:
+        // entre o carregamento via REST e o socket conectar, ou durante uma queda.
+        // Reconcilia com a API os recursos que estão na tela.
+        const active = { refetchType: 'active' } as const
+        void queryClient.invalidateQueries({ queryKey: queryKeys.nfts.all, ...active })
+        void queryClient.invalidateQueries({ queryKey: queryKeys.cart.all, ...active })
+        if (userId) {
+          void queryClient.invalidateQueries({ queryKey: queryKeys.user.orders(userId), ...active })
         }
-        hasConnected = true
       })
       socket.on('disconnect', (reason) => {
         // "io client disconnect" = fechamos de propósito (troca de sessão)
