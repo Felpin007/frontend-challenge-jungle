@@ -34,4 +34,9 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Fixtures do Playwright usam uma função chamada `use`, que não é hook do React.
+    files: ['tests/**/*.ts'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
 )

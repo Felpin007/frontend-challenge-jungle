@@ -68,8 +68,11 @@ export const PRESETS = {
   'short-session': { description: 'Sessão expira 60 s após o login', sessionTtlMs: 60_000 },
   'payment-declined': { description: 'Pagamentos são recusados', payment: 'decline' },
   'order-timeout': {
-    description: 'Criação do pedido sofre timeout (recuperação por idempotência)',
+    description:
+      'Criação do pedido sofre timeout (recuperação por idempotência); o pedido confirma em 20 s',
     orderTimeout: true,
+    // Pendente por mais tempo que o timeout do cliente (8 s), para exercitar a nova tentativa.
+    orderResolutionMs: 20_000,
   },
   'wallet-rejected': { description: 'A carteira recusa a conexão', wallet: 'reject' },
   'favorites-failure': { description: 'Favoritar responde HTTP 500', serverError: ['favorites'] },

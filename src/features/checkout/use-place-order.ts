@@ -82,6 +82,9 @@ export function usePlaceOrder(userId: string, onCreated: (order: Order) => void)
               apiError.code === 'NETWORK_ERROR' ||
               apiError.status >= 500
             if (retryable && i < MAX_RETRIES) {
+              // Já avisa que estamos verificando (a espera antes de repetir faz parte da recuperação).
+              setState({ status: 'recovering', attempt: i + 1 })
+              console.info('[checkout] tentativa sem resposta, repetindo com a mesma chave:', apiError.code)
               await wait(800 * 2 ** i)
               continue
             }
